@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Tree of Life</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      background: #1a1410;
+      color: #e8dfc8;
+      overflow: hidden; /* no outer scroll — panels scroll internally */
+    }
+
+    /* ── Layout ── */
+    #app {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Left panel — tree */
+    #left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 420px;
+      min-width: 280px;
+      flex-shrink: 0;
+      border-right: 1px solid #2e2518;
+      overflow-y: auto;
+      padding: 32px 16px 32px;
+      scrollbar-width: thin;
+      scrollbar-color: #3a2e1e transparent;
+    }
+    #left::-webkit-scrollbar { width: 4px; }
+    #left::-webkit-scrollbar-thumb { background: #3a2e1e; border-radius: 2px; }
+
+    #left h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      color: #c9a84c;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      font-style: italic;
+      color: #8a7a5a;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      font-size: 0.75rem;
+      color: #8a7a5a;
+      letter-spacing: 0.05em;
+    }
+    .controls input[type=range] {
+      -webkit-appearance: none;
+      width: 100px;
+      height: 2px;
+      background: #3a2e1e;
+      outline: none;
+      border-radius: 2px;
+    }
+    .controls input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #c9a84c;
+      cursor: pointer;
+    }
+
+    #svg-container svg {
+      width: 100%;
+      max-width: 360px;
+      display: block;
+    }
+
+    /* Right panel — info */
+    #right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #info-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 48px 56px;
+      scrollbar-width: thin;
+      scrollbar-color: #3a2e1e transparent;
+    }
+    #info-panel::-webkit-scrollbar { width: 4px; }
+    #info-panel::-webkit-scrollbar-thumb { background: #3a2e1e; border-radius: 2px; }
+
+    /* Empty state */
+    #info-empty {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3a2e1e;
+      font-size: 1.1rem;
+      font-style: italic;
+      letter-spacing: 0.1em;
+      user-select: none;
+    }
+
+    /* Info content */
+    #info-content { display: none; }
+    #info-content.visible { display: block; }
+
+    #info-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      color: #5a4e38;
+      letter-spacing: 0.25em;
+      margin-bottom: 8px;
+    }
+    #info-title {
+      font-family: 'Cinzel', serif;
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #c9a84c;
+      margin-bottom: 20px;
+      letter-spacing: 0.03em;
+      line-height: 1.2;
+    }
+    .info-divider {
+      width: 48px;
+      height: 1px;
+      background: #c9a84c;
+      margin-bottom: 24px;
+      opacity: 0.4;
+    }
+    #info-text {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: #c8bfa8;
+      font-style: italic;
+    }
+    #info-text p { margin-bottom: 1.1em; }
+    #info-text p:last-child { margin-bottom: 0; }
+    #info-text strong {
+      color: #c9a84c;
+      font-style: normal;
+    }
+    #info-text em { color: #a89878; }
+    #info-text h2, #info-text h3 {
+      font-family: 'Cinzel', serif;
+      font-style: normal;
+      color: #c9a84c;
+      font-weight: 400;
+      margin: 1.2em 0 0.5em;
+      letter-spacing: 0.08em;
+    }
+    #info-text h2 { font-size: 1.1rem; }
+    #info-text h3 { font-size: 0.9rem; color: #8a7a5a; }
+
+    /* SVG elements */
+    .sephirah {
+      fill: #1a1410;
+      stroke: #c9a84c;
+      stroke-width: 0.06;
+      cursor: pointer;
+      transition: fill 0.2s;
+    }
+    .sephirah:hover { fill: #2e2210; }
+    .sephirah.active { fill: #2a1f0a; stroke: #e8c86a; }
+
+    .seph-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.48px;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      pointer-events: none;
+      fill: #c9a84c;
+    }
+    .seph-number {
+      font-size: 0.38px;
+      fill: #8a7a5a;
+    }
+
+    .path-line {
+      stroke: #4a3c28;
+      stroke-width: 0.08;
+      transition: stroke 0.2s;
+    }
+    .path-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.42px;
+      text-anchor: middle;
+      dominant-baseline: middle;
+      pointer-events: none;
+      fill: #7a6a4a;
+      transition: fill 0.2s;
+    }
+    .path-hit {
+      fill: transparent;
+      stroke: none;
+      cursor: pointer;
+    }
+    .path-group:hover .path-line { stroke: #c9a84c; }
+    .path-group:hover .path-label { fill: #c9a84c; }
+    .path-group.active .path-line { stroke: #e8c86a; }
+    .path-group.active .path-label { fill: #e8c86a; }
+
+    /* ── Mobile: slide between tree and info ── */
+    @media (max-width: 700px) {
+      html, body { overflow: hidden; }
+
+      #app {
+        flex-direction: row;
+        width: 200vw;         /* two full-width panels side by side */
+        height: 100vh;
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      #app.show-info {
+        transform: translateX(-100vw);  /* slide left to reveal info */
+      }
+
+      #left {
+        width: 100vw;
+        height: 100vh;
+        border-right: none;
+        flex-shrink: 0;
+      }
+
+      #right {
+        width: 100vw;
+        height: 100vh;
+        flex-shrink: 0;
+      }
+
+      #info-panel { padding: 0; height: 100%; }
+
+      /* Back button */
+      #mobile-back {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 16px 20px;
+        font-family: 'Cinzel', serif;
+        font-size: 0.7rem;
+        letter-spacing: 0.15em;
+        color: #8a7a5a;
+        border-bottom: 1px solid #2e2518;
+        cursor: pointer;
+        user-select: none;
+        flex-shrink: 0;
+      }
+      #mobile-back:active { color: #c9a84c; }
+      #mobile-back svg { width: 14px; height: 14px; }
+
+      #right {
+        display: flex;
+        flex-direction: column;
+      }
+
+      #info-panel {
+        flex: 1;
+        overflow-y: auto;
+        padding: 28px 24px 40px;
+      }
+
+      #info-empty { min-height: 200px; }
+    }
+
+    /* Hide back button on desktop */
+    #mobile-back { display: none; }
+  </style>
+</head>
+<body>
+
+<div id="app">
+
+    <!-- Left: Tree -->
+    <div id="left">
+      <h1>Tree of Life</h1>
+      <p class="subtitle">Click a sephirah or path</p>
+      <div class="controls">
+        <span>Compact</span>
+        <input type="range" id="scale-slider" min="1" max="2.5" step="0.05" value="1.5">
+        <span>Spacious</span>
+      </div>
+      <div id="svg-container"></div>
+    </div>
+
+    <!-- Right: Info -->
+    <div id="right">
+      <div id="mobile-back" onclick="mobileBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Tree
+      </div>
+      <div id="info-panel">
+        <div id="info-empty">Select a sephirah or path</div>
+        <div id="info-content">
+          <div id="info-label"></div>
+          <div id="info-title"></div>
+          <div class="info-divider"></div>
+          <div id="info-text"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ─── DATA (loaded from data.json) ────────────────────────────────────────
+
+    let SEPHIROTH = [];
+    let PATHS = [];
+
+    // ─── CONFIG ───────────────────────────────────────────────────────────────
+
+    const R = 1.2;       // sephirah radius
+    const GAP = 0.65;    // half-gap either side of path label
+    const SVG_W = 9.1;   // viewBox width (before padding)
+    const PAD = 0.1;     // viewBox padding
+
+    let SCALE_Y = 1.5;
+
+    // ─── HELPERS ──────────────────────────────────────────────────────────────
+
+    const ns = "http://www.w3.org/2000/svg";
+
+    function el(tag, attrs = {}) {
+      const e = document.createElementNS(ns, tag);
+      for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+      return e;
+    }
+
+    function sephPos(id) {
+      const s = SEPHIROTH.find(s => s.id === id);
+      return { x: s.x, y: s.y * SCALE_Y };
+    }
+
+    // ─── RENDER ───────────────────────────────────────────────────────────────
+
+    function render() {
+      const maxY = Math.max(...SEPHIROTH.map(s => s.y)) * SCALE_Y;
+      const vbH = maxY + R + PAD * 2 + 0.5; // a little bottom breathing room
+
+      const svg = el("svg", {
+        viewBox: `${-PAD} ${-PAD} ${SVG_W + PAD * 2} ${vbH}`,
+      });
+
+      // ── Paths (drawn first, behind circles) ──
+      const pathsG = el("g", { id: "paths" });
+
+      for (const path of PATHS) {
+        const a = sephPos(path.from);
+        const b = sephPos(path.to);
+        const mx = (a.x + b.x) / 2;
+        const my = (a.y + b.y) / 2;
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        let angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        if (angle > 90 || angle < -90) angle += 180;
+
+        // Local x coords: path runs from -dist/2 to +dist/2
+        const l1x1 = -(dist / 2 - R);
+        const l1x2 = -GAP;
+        const l2x1 =  GAP;
+        const l2x2 =  dist / 2 - R;
+
+        const g = el("g", {
+          class: "path-group",
+          transform: `translate(${mx},${my}) rotate(${angle.toFixed(2)})`,
+          "data-path-n": path.n,
+        });
+
+        // Invisible wide hit area covering the full path length
+        g.appendChild(el("rect", {
+          class: "path-hit",
+          x: -(dist / 2 - R),
+          y: -0.4,
+          width: dist - R * 2,
+          height: 0.8,
+        }));
+
+        // Only draw lines if there's room
+        if (l1x2 > l1x1) {
+          g.appendChild(el("line", { class: "path-line", x1: l1x1, y1: 0, x2: l1x2, y2: 0 }));
+          g.appendChild(el("line", { class: "path-line", x1: l2x1, y1: 0, x2: l2x2, y2: 0 }));
+        }
+
+        const label = el("text", { class: "path-label", x: 0, y: 0 });
+        label.textContent = `${path.n} · ${path.letter} (${path.heb})`;
+        g.appendChild(label);
+
+        g.addEventListener("click", () => openPathPopup(path));
+        pathsG.appendChild(g);
+      }
+
+      svg.appendChild(pathsG);
+
+      // ── Sephiroth ──
+      const sephG = el("g", { id: "sephiroth" });
+
+      for (const s of SEPHIROTH) {
+        const cy = s.y * SCALE_Y;
+
+        const circle = el("circle", {
+          id: s.id,
+          class: "sephirah",
+          cx: s.x,
+          cy: cy,
+          r: R,
+        });
+        circle.addEventListener("click", () => openPopup(s));
+        sephG.appendChild(circle);
+
+        // Number (smaller, above centre)
+        const numText = el("text", {
+          class: "seph-label seph-number",
+          x: s.x,
+          y: cy - 0.28,
+        });
+        numText.setAttribute("text-anchor", "middle");
+        numText.setAttribute("dominant-baseline", "middle");
+        numText.textContent = s.n;
+        sephG.appendChild(numText);
+
+        // Name (below centre)
+        const nameText = el("text", {
+          class: "seph-label",
+          x: s.x,
+          y: cy + 0.27,
+        });
+        nameText.setAttribute("text-anchor", "middle");
+        nameText.setAttribute("dominant-baseline", "middle");
+        nameText.textContent = s.label;
+        sephG.appendChild(nameText);
+      }
+
+      svg.appendChild(sephG);
+
+      // Replace old SVG
+      const container = document.getElementById("svg-container");
+      container.innerHTML = "";
+      container.appendChild(svg);
+    }
+
+    // ─── INFO PANEL ───────────────────────────────────────────────────────────
+
+    function renderContent(item) {
+      // If item has a structured fields array, render that.
+      // Otherwise fall back to raw HTML in item.text.
+      if (item.fields && item.fields.length) {
+        return item.fields.map(f =>
+          `<p><strong>${f.label}</strong><br>${f.value}</p>`
+        ).join("");
+      }
+      return item.text || "<p>No notes yet.</p>";
+    }
+
+    function isMobile() { return window.innerWidth <= 700; }
+
+    function mobileBack() {
+      document.getElementById("app").classList.remove("show-info");
+    }
+
+    function showInfo(label, title, item) {
+      document.getElementById("info-empty").style.display = "none";
+      document.getElementById("info-content").classList.add("visible");
+      document.getElementById("info-label").textContent = label;
+      document.getElementById("info-title").textContent = title;
+      document.getElementById("info-text").innerHTML = renderContent(item);
+      document.getElementById("info-panel").scrollTop = 0;
+      // On mobile, slide to info panel
+      if (isMobile()) {
+        document.getElementById("app").classList.add("show-info");
+      }
+    }
+
+    function openPathPopup(path) {
+      showInfo(`PATH ${path.n}`, `${path.letter} — ${path.heb}`, path);
+      document.querySelectorAll(".sephirah").forEach(c => c.classList.remove("active"));
+      document.querySelectorAll(".path-group").forEach(g => g.classList.remove("active"));
+      document.querySelector(`.path-group[data-path-n="${path.n}"]`)?.classList.add("active");
+    }
+
+    function openPopup(s) {
+      showInfo(`SEPHIRAH ${s.n}`, s.title, s);
+      document.querySelectorAll(".sephirah").forEach(c => c.classList.remove("active"));
+      document.querySelectorAll(".path-group").forEach(g => g.classList.remove("active"));
+      document.getElementById(s.id)?.classList.add("active");
+    }
+
+    // ─── SCALE SLIDER ─────────────────────────────────────────────────────────
+
+    const slider = document.getElementById("scale-slider");
+    slider.addEventListener("input", () => {
+      SCALE_Y = parseFloat(slider.value);
+      render();
+    });
+
+    // ─── INIT ─────────────────────────────────────────────────────────────────
+
+    async function init() {
+      try {
+        const data = await fetch("data.json").then(r => r.json());
+        SEPHIROTH = data.sephiroth;
+        PATHS = data.paths;
+        render();
+      } catch (e) {
+        document.getElementById("info-empty").textContent =
+          "Could not load data.json — make sure it is in the same folder and you are running a local server.";
+        console.error(e);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

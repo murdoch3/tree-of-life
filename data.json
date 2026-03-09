@@ -1,0 +1,585 @@
+{
+  "sephiroth": [
+    {
+      "id": "kether",
+      "n": 1,
+      "x": 4.5,
+      "y": 1.2,
+      "label": "Kether",
+      "title": "Kether",
+      "text": "<p><strong>Crown.</strong> The first emanation, pure unity before all distinctions.</p><p>Divine name: <em>Eheieh</em> — I Am.</p>"
+    },
+    {
+      "id": "chokmah",
+      "n": 2,
+      "x": 7.8,
+      "y": 3.1,
+      "label": "Chokmah",
+      "title": "Chokmah",
+      "text": "<p><strong>Wisdom.</strong> The primordial flash of divine intelligence — dynamic, undifferentiated creative force.</p>"
+    },
+    {
+      "id": "binah",
+      "n": 3,
+      "x": 1.2,
+      "y": 3.1,
+      "label": "Binah",
+      "title": "Binah",
+      "text": "<p><strong>Understanding.</strong> The great mother who gives form to the formless. Structure, limitation, and gestation.</p>"
+    },
+    {
+      "id": "chesed",
+      "n": 4,
+      "x": 7.8,
+      "y": 6.7,
+      "label": "Chesed",
+      "title": "Chesed",
+      "fields": [{"label": "Title", "value": " ChSD, Chesed (Mercy)"}, {"label": "Name of God", "value": " AL, El (God)"}, {"label": "Archangel", "value": " TzDQIAL, Tzadkiel (Justice of God)"}, {"label": "Angelic Host", "value": " ChShMLIM, Chashmalim (Shining Ones)"}, {"label": "Astrological Correspondence", "value": " TzDQ, Tzedek (Jupiter)"}, {"label": "Tarot Correspondence", "value": " the four Fours of the pack"}, {"label": "Elemental Correspondence", "value": " Water"}, {"label": "Path Text", "value": " The Fourth Path is called the Cohesive or Receptive Intelligence, and is so called because it contains all the Holy Powers, and from it emanate all the spiritual virtues with the most exalted essences.  These emanate, one from another, by the power of the Primordial Emanation, the Highest Crown."}, {"label": "Magical Image", "value": " An old but mighty king sitting on a sapphire throne, robed in blue and violet, a golden crown on his head and a scepter and orb in his hands"}, {"label": "Additional Title", "value": " GDVLH, Gedulah (Majesty or Greatness)"}, {"label": "Colors", "value": " in Atziluth--deep violet. in Briah--blue. in Yetzirah--deep purple. in Assiah--deep azure, flecked with yellow."}, {"label": "Correspondence in the Microcosm", "value": " the memory in Ruach."}, {"label": "Correspondence in the Body", "value": " the left shoulder."}, {"label": "Grade of Initiation", "value": " 7=4, Adeptus Exemptus"}, {"label": "Negative Power", "value": " GAaShKLH, Ga'ashekelah, the Breakers in Pieces"}]
+    },
+    {
+      "id": "geburah",
+      "n": 5,
+      "x": 1.2,
+      "y": 6.7,
+      "label": "Geburah",
+      "title": "Geburah",
+      "fields": [{"label": "Title", "value": " GBVRH, Geburah (Severity)"}, {"label": "Name of God", "value": " ALHIM GBVR, Elohim Gibor (Gods of Power)"}, {"label": "Archangel", "value": " KMAL, Kamael (He Who Sees God)"}, {"label": "Angelic Host", "value": " ShRPIM, Seraphim (Fiery Serpents)"}, {"label": "Astrological Correspondence", "value": " MDIM, Madim (Mars)"}, {"label": "Tarot Correspondence", "value": " the four Fives of the pack"}, {"label": "Elemental Correspondence", "value": " Fire"}, {"label": "Path Text", "value": " The Fifth Path is called the Radical Intelligence because it is itself the essence of Unity, uniting itself to Understanding, which emanates from the primordial depths of Wisdom."}, {"label": "Magical Image", "value": " A warrior queen in full armour, standing in a red chariot pulled by two roan horses, her head bare except for a crown, her dark hair loose, and a drawn sword in her hand."}, {"label": "Additional Symbol", "value": " the pentagram"}, {"label": "Additional Title", "value": " PChD, Pachad (Fear)"}, {"label": "Colors", "value": " in Atziluth--orange. in Briah--red. in Yetzirah--bright scarlet. in Assiah--red, flecked with black."}, {"label": "Correspondence in the Microcosm", "value": " the will in Ruach"}, {"label": "Correspondence in the Body", "value": " the left shoulder"}, {"label": "Grade of Initiation", "value": " 6=5, Adeptus Major"}, {"label": "Negative Power", "value": " GVLHB, Golohab (the Burners)"}]
+    },
+    {
+      "id": "tiphareth",
+      "n": 6,
+      "x": 4.5,
+      "y": 8.75,
+      "label": "Tiphareth",
+      "title": "Tiphareth",
+      "fields": [
+        {
+          "label": "Title",
+          "value": " ThPARTh, Tiphareth (Beauty)"
+        },
+        {
+          "label": "Name of God",
+          "value": " YHVH ALVH VDAaTh, Tetragrammaton Eloah va-Daath (Lord God of Knowledge)"
+        },
+        {
+          "label": "Archangel",
+          "value": " MKAL, Michael (Who Is Like God?)"
+        },
+        {
+          "label": "Angelic Host",
+          "value": " MLKIM, Malakim (Kings)"
+        },
+        {
+          "label": "Astrological Correspondence",
+          "value": " ShMSh, Shemesh (the Sun)"
+        },
+        {
+          "label": "Tarot Correspondence",
+          "value": " the four Sixes and four Knights or Princes of the pack"
+        },
+        {
+          "label": "Elemental Correspondence",
+          "value": " Air"
+        },
+        {
+          "label": "Path Text",
+          "value": " The Sixth Path is called the Mediating Intelligence, because in it are multiplied the influxes of the Emanations, for it causes that influence to flow into all the reservoirs of the blessings, with which these themselves are united."
+        },
+        {
+          "label": "Magical Image",
+          "value": " A naked child with golden hair, standing with its arms upraised; a king in robes and brown of gold, dark-haired, bearded, seated on a throne, holding a sword in his right hand and a wand topped with a lotus blossom on his left; a naked man crucified on a black leafless tree, tied to the tree at wrists and ankles with bloody ropes"
+        },
+        {
+          "label": "Additional Symbol",
+          "value": " The cube, the cross of six squares, the truncated pyramid"
+        },
+        {
+          "label": "Additional Title",
+          "value": " Microprosopus, the Lesser Countenance"
+        },
+        {
+          "label": "Colors",
+          "value": " in Atziluth--clear rose pink. in Briah--golden yellow. in Yetzirah--rich salmon-pink. in Assiah--golden amber."
+        },
+        {
+          "label": "Correspondence in the Microcosm",
+          "value": " the imagination in Ruach"
+        },
+        {
+          "label": "Correspondence in the Body",
+          "value": " The solar plexus"
+        },
+        {
+          "label": "Grade of Initiation",
+          "value": " 5=6, Adeptus Minor"
+        },
+        {
+          "label": "Negative Power",
+          "value": " ThGRIRVN, Tagiriron (the Disputers)"
+        }
+      ]
+    },
+    {
+      "id": "netzach",
+      "n": 7,
+      "x": 7.8,
+      "y": 10.4,
+      "label": "Netzach",
+      "title": "Netzach",
+      "fields": [
+        {
+          "label": "Title",
+          "value": "NTzCH, Netzach (Victory)"
+        },
+        {
+          "label": "Name of God",
+          "value": "YHVH TzBAVTh, Tetragrammaton Tzabaoth (Lord of Armies)"
+        },
+        {
+          "label": "Archangel",
+          "value": "HANIAL, Haniel (Grace of God)"
+        },
+        {
+          "label": "Angelic Host",
+          "value": "ThRShIShIM, Tarshishim (Brilliant Ones)"
+        },
+        {
+          "label": "Astrological Correspondence",
+          "value": "NVGH, Nogah (Venus)"
+        },
+        {
+          "label": "Tarot Correspondence",
+          "value": "The four Sevens of the pack"
+        },
+        {
+          "label": "Elemental Correspondence",
+          "value": "Fire"
+        },
+        {
+          "label": "Path Text",
+          "value": "The Seventh Path is called the Occult Intelligence because it is the refulgent splendour of all the intellectual virtues, which are perceived by the eyes of the intellect and the contemplations of faith."
+        },
+        {
+          "label": "Magical Image",
+          "value": "A beautiful naked woman. Her hair is long and unbound, and she wears a crown of deep red roses and green leaves; this is her only ornament."
+        },
+        {
+          "label": "Additional Symbol",
+          "value": "The rose"
+        },
+        {
+          "label": "Additional Title",
+          "value": "The Gate of the Mysteries"
+        },
+        {
+          "label": "Colors",
+          "value": "In Atziluth — amber. In Briah — emerald. In Yetzirah — bright yellow-green. In Assiah — olive, flecked with gold."
+        },
+        {
+          "label": "Correspondence in the Microcosm",
+          "value": "The emotions in Ruach"
+        },
+        {
+          "label": "Correspondence in the Body",
+          "value": "The left hip"
+        },
+        {
+          "label": "Grade of Initiation",
+          "value": "4=7, Philosophus"
+        },
+        {
+          "label": "Negative Power",
+          "value": "AaRB TzRQ, A'arab Tzereq (the Ravens of Dispersion)"
+        }
+      ]
+    },
+    {
+      "id": "hod",
+      "n": 8,
+      "x": 1.2,
+      "y": 10.4,
+      "label": "Hod",
+      "title": "Hod",
+      "fields": [
+        {
+          "label": "Title",
+          "value": "HVD, Hod (Splendour)"
+        },
+        {
+          "label": "Name of God",
+          "value": "ALHIM TzBAVTh, Elohim Tzabaoth (Gods of Armies)"
+        },
+        {
+          "label": "Archangel",
+          "value": "RPhAL, Raphael (Healing of God)"
+        },
+        {
+          "label": "Angelic Host",
+          "value": "BNI ALHIM, Beni Elohim (Sons of Elohim)"
+        },
+        {
+          "label": "Astrological Correspondence",
+          "value": "KVKB, Kokab (Mercury)"
+        },
+        {
+          "label": "Tarot Correspondence",
+          "value": "The four Eights of the pack"
+        },
+        {
+          "label": "Elemental Correspondence",
+          "value": "Water"
+        },
+        {
+          "label": "Path Text",
+          "value": "The Eighth Path is called the Absolute or Perfect Intelligence, because it is the mean of the Primordial; it has no root by which it can cleave or rest except the hidden places of Gedulah, which emanate from its own proper essence."
+        },
+        {
+          "label": "Magical Image",
+          "value": "A winged hermaphrodite, wearing an orange loincloth and sandals, holding a staff in its right hand and a lantern in its left."
+        },
+        {
+          "label": "Additional Title",
+          "value": "The Caduceus"
+        },
+        {
+          "label": "Colors",
+          "value": "In Atziluth — violet purple. In Briah — orange. In Yetzirah — reddish russet. In Assiah — yellowish brown, flecked with white."
+        },
+        {
+          "label": "Correspondence in the Microcosm",
+          "value": "The intellect in Ruach"
+        },
+        {
+          "label": "Correspondence in the Body",
+          "value": "The right hip"
+        },
+        {
+          "label": "Grade of Initiation",
+          "value": "3=8, Practicus"
+        },
+        {
+          "label": "Negative Power",
+          "value": "SMAL, Samael (the Liars)"
+        }
+      ]
+    },
+    {
+      "id": "yesod",
+      "n": 9,
+      "x": 4.5,
+      "y": 12.5,
+      "label": "Yesod",
+      "title": "Yesod",
+      "fields": [
+        {
+          "label": "Title",
+          "value": "ISVD, Yesod (Foundation)"
+        },
+        {
+          "label": "Name of God",
+          "value": "ShDI AL ChI, Shaddai El Chai (Almighty Living God)"
+        },
+        {
+          "label": "Archangel",
+          "value": "GBRIAL, Gabriel (Strength of God)"
+        },
+        {
+          "label": "Angelic Host",
+          "value": "KRVBIM, Kerubim (Powers of the Elements)"
+        },
+        {
+          "label": "Astrological Correspondence",
+          "value": "LBNH, Levanah (the Moon)"
+        },
+        {
+          "label": "Tarot Correspondence",
+          "value": "The four Nines of the pack"
+        },
+        {
+          "label": "Elemental Correspondence",
+          "value": "Air"
+        },
+        {
+          "label": "Path Text",
+          "value": "The Ninth Path is the Pure Intelligence, so called because it purifies the Numerations; it proves and corrects the designing of their representation, and disposes the unity with which they are combined without diminution or division."
+        },
+        {
+          "label": "Magical Image",
+          "value": "A beautiful and very strong naked man standing upon a cube of stone, his arms raised in the position of Atlas holding up the sky."
+        },
+        {
+          "label": "Additional Title",
+          "value": "The Treasure House of Images"
+        },
+        {
+          "label": "Colors",
+          "value": "In Atziluth — indigo. In Briah — violet. In Yetzirah — very dark purple. In Assiah — citrine, flecked with azure."
+        },
+        {
+          "label": "Correspondence in the Microcosm",
+          "value": "The Nephesh"
+        },
+        {
+          "label": "Correspondence in the Body",
+          "value": "The genitals"
+        },
+        {
+          "label": "Grade of Initiation",
+          "value": "2=9, Theoricus"
+        },
+        {
+          "label": "Negative Power",
+          "value": "GMLIAL, Gamaliel (the Obscene Ones)"
+        }
+      ]
+    },
+    {
+      "id": "malkuth",
+      "n": 10,
+      "x": 4.5,
+      "y": 16.0,
+      "label": "Malkuth",
+      "title": "Malkuth",
+      "fields": [
+        {
+          "label": "Title",
+          "value": "MLKVTh, Malkuth (Kingdom)"
+        },
+        {
+          "label": "Name of God",
+          "value": "ADNI, Adonai (Lord)"
+        },
+        {
+          "label": "Archangels",
+          "value": "MThThRVN, Metatron (Prince of Countenances); SNDLPHVN, Sandalphon (Twin Brother)"
+        },
+        {
+          "label": "Angelic Host",
+          "value": "AIShIM, Ishim (Humanity)"
+        },
+        {
+          "label": "Astrological Correspondence",
+          "value": "AaVLM YSWDWTh, Olam Yesodoth (Sphere of the Elements)"
+        },
+        {
+          "label": "Tarot Correspondence",
+          "value": "The four Tens and four Pages or Princesses of the pack"
+        },
+        {
+          "label": "Elemental Correspondence",
+          "value": "Earth"
+        },
+        {
+          "label": "Path Text",
+          "value": "The Tenth Path is the Resplendent Intelligence, because it is exalted above every head, and sits on the throne of Binah. It illuminates the splendor of all the Lights, and causes an influence to descend from the Prince of Countenances."
+        },
+        {
+          "label": "Magical Image",
+          "value": "A young woman in a robe of mixed earth colors, her feet bare and her hair unbound, sitting on a throne of roughly shaped black stone."
+        },
+        {
+          "label": "Additional Symbols",
+          "value": "The altar, the equal-armed cross, the temple, the Tree of Knowledge of Good and Evil."
+        },
+        {
+          "label": "Colors",
+          "value": "In Atziluth — clear yellow. In Briah — citrine, olive, russet, and black. In Yetzirah — as Briah, but flecked with gold. In Assiah — black rayed with yellow."
+        },
+        {
+          "label": "Correspondence in the Microcosm",
+          "value": "GVP, Guph (the physical body)"
+        },
+        {
+          "label": "Correspondence in the Body",
+          "value": "The feet"
+        },
+        {
+          "label": "Grade of Initiation",
+          "value": "1=10, Zelator"
+        },
+        {
+          "label": "Negative Power",
+          "value": "LILITh, Lilith (the Woman of Night)"
+        }
+      ]
+    }
+  ],
+  "paths": [
+    {
+      "n": 11,
+      "from": "kether",
+      "to": "chokmah",
+      "letter": "Aleph",
+      "heb": "א",
+      "text": "<p>Your notes for path 11.</p>"
+    },
+    {
+      "n": 12,
+      "from": "kether",
+      "to": "binah",
+      "letter": "Beth",
+      "heb": "ב",
+      "text": "<p>Your notes for path 12.</p>"
+    },
+    {
+      "n": 13,
+      "from": "kether",
+      "to": "tiphareth",
+      "letter": "Gimel",
+      "heb": "ג",
+      "text": "<p>Your notes for path 13.</p>"
+    },
+    {
+      "n": 14,
+      "from": "chokmah",
+      "to": "binah",
+      "letter": "Daleth",
+      "heb": "ד",
+      "text": "<p>Your notes for path 14.</p>"
+    },
+    {
+      "n": 15,
+      "from": "chokmah",
+      "to": "tiphareth",
+      "letter": "Heh",
+      "heb": "ה",
+      "text": "<p>Your notes for path 15.</p>"
+    },
+    {
+      "n": 16,
+      "from": "chokmah",
+      "to": "chesed",
+      "letter": "Vav",
+      "heb": "ו",
+      "text": "<p>Your notes for path 16.</p>"
+    },
+    {
+      "n": 17,
+      "from": "binah",
+      "to": "tiphareth",
+      "letter": "Zayin",
+      "heb": "ז",
+      "text": "<p>Your notes for path 17.</p>"
+    },
+    {
+      "n": 18,
+      "from": "binah",
+      "to": "geburah",
+      "letter": "Cheth",
+      "heb": "ח",
+      "text": "<p>Your notes for path 18.</p>"
+    },
+    {
+      "n": 19,
+      "from": "chesed",
+      "to": "geburah",
+      "letter": "Teth",
+      "heb": "ט",
+      "text": "<p>Your notes for path 19.</p>"
+    },
+    {
+      "n": 20,
+      "from": "chesed",
+      "to": "tiphareth",
+      "letter": "Yod",
+      "heb": "י",
+      "text": "<p>Your notes for path 20.</p>"
+    },
+    {
+      "n": 21,
+      "from": "chesed",
+      "to": "netzach",
+      "letter": "Kaph",
+      "heb": "כ",
+      "text": "<p>Your notes for path 21.</p>"
+    },
+    {
+      "n": 22,
+      "from": "geburah",
+      "to": "tiphareth",
+      "letter": "Lamed",
+      "heb": "ל",
+      "text": "<p>Your notes for path 22.</p>"
+    },
+    {
+      "n": 23,
+      "from": "geburah",
+      "to": "hod",
+      "letter": "Mem",
+      "heb": "מ",
+      "text": "<p>Your notes for path 23.</p>"
+    },
+    {
+      "n": 24,
+      "from": "tiphareth",
+      "to": "netzach",
+      "letter": "Nun",
+      "heb": "נ",
+      "text": "<p>Your notes for path 24.</p>"
+    },
+    {
+      "n": 25,
+      "from": "tiphareth",
+      "to": "yesod",
+      "letter": "Samekh",
+      "heb": "ס",
+      "text": "<p>Your notes for path 25.</p>"
+    },
+    {
+      "n": 26,
+      "from": "tiphareth",
+      "to": "hod",
+      "letter": "Ayin",
+      "heb": "ע",
+      "text": "<p>Your notes for path 26.</p>"
+    },
+    {
+      "n": 27,
+      "from": "netzach",
+      "to": "hod",
+      "letter": "Peh",
+      "heb": "פ",
+      "text": "<p>Your notes for path 27.</p>"
+    },
+    {
+      "n": 28,
+      "from": "netzach",
+      "to": "yesod",
+      "letter": "Tzaddi",
+      "heb": "צ",
+      "text": "<p>Your notes for path 28.</p>"
+    },
+    {
+      "n": 29,
+      "from": "netzach",
+      "to": "malkuth",
+      "letter": "Qoph",
+      "heb": "ק",
+      "text": "<p>Your notes for path 29.</p>"
+    },
+    {
+      "n": 30,
+      "from": "hod",
+      "to": "yesod",
+      "letter": "Resh",
+      "heb": "ר",
+      "text": "<p>Your notes for path 30.</p>"
+    },
+    {
+      "n": 31,
+      "from": "hod",
+      "to": "malkuth",
+      "letter": "Shin",
+      "heb": "ש",
+      "text": "<p>Your notes for path 31.</p>"
+    },
+    {
+      "n": 32,
+      "from": "yesod",
+      "to": "malkuth",
+      "letter": "Tav",
+      "heb": "ת",
+      "text": "<p>Your notes for path 32.</p>"
+    }
+  ]
+}
