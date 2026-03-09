@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tree of Life</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
   <style>
@@ -220,18 +221,21 @@
     .path-group.active .path-line { stroke: #e8c86a; }
     .path-group.active .path-label { fill: #e8c86a; }
 
+    /* Hide back button on desktop */
+    #mobile-back { display: none; }
+
     /* ── Mobile: slide between tree and info ── */
     @media (max-width: 700px) {
       html, body { overflow: hidden; }
 
       #app {
         flex-direction: row;
-        width: 200vw;         /* two full-width panels side by side */
+        width: 200vw;
         height: 100vh;
         transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       }
       #app.show-info {
-        transform: translateX(-100vw);  /* slide left to reveal info */
+        transform: translateX(-100vw);
       }
 
       #left {
@@ -245,11 +249,10 @@
         width: 100vw;
         height: 100vh;
         flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
       }
 
-      #info-panel { padding: 0; height: 100%; }
-
-      /* Back button */
       #mobile-back {
         display: flex;
         align-items: center;
@@ -267,11 +270,6 @@
       #mobile-back:active { color: #c9a84c; }
       #mobile-back svg { width: 14px; height: 14px; }
 
-      #right {
-        display: flex;
-        flex-direction: column;
-      }
-
       #info-panel {
         flex: 1;
         overflow-y: auto;
@@ -280,9 +278,6 @@
 
       #info-empty { min-height: 200px; }
     }
-
-    /* Hide back button on desktop */
-    #mobile-back { display: none; }
   </style>
 </head>
 <body>
@@ -473,7 +468,7 @@
       return item.text || "<p>No notes yet.</p>";
     }
 
-    function isMobile() { return window.innerWidth <= 700; }
+    const mobileQuery = window.matchMedia("(max-width: 700px)");
 
     function mobileBack() {
       document.getElementById("app").classList.remove("show-info");
@@ -486,8 +481,7 @@
       document.getElementById("info-title").textContent = title;
       document.getElementById("info-text").innerHTML = renderContent(item);
       document.getElementById("info-panel").scrollTop = 0;
-      // On mobile, slide to info panel
-      if (isMobile()) {
+      if (mobileQuery.matches) {
         document.getElementById("app").classList.add("show-info");
       }
     }
