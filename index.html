@@ -301,6 +301,50 @@
     .cv-path-group.active .cv-path-frame { stroke: #e8c86a; }
     .cv-group.active .cv-seph-border { stroke: #e8c86a; }
 
+    /* ── Guide lines in card view ── */
+    .cv-guide-line {
+      stroke: #2e2518;
+      stroke-width: 0.055;
+      stroke-dasharray: 0.18 0.1;
+    }
+    .cv-path-group:hover .cv-guide-line { stroke: #7a6a4a; }
+    .cv-path-group.active .cv-guide-line { stroke: #c9a84c; }
+
+    /* ── Card view: full-screen, fixed height, no info panel ── */
+    .card-view-mode #right { display: none; }
+    .card-view-mode #left {
+      width: 100%;
+      max-width: 100%;
+      border-right: none;
+      padding: 16px 24px 0;
+      overflow: hidden;
+    }
+    /* flex: 1 + min-height: 0 lets the container grow to fill remaining panel
+       height without overflowing; SVG height: 100% then fills it exactly */
+    .card-view-mode #svg-container {
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+    }
+    .card-view-mode #svg-container svg {
+      max-width: none;
+      width: 100%;
+      height: 100%;
+    }
+    .card-view-mode #svg-container { cursor: grab; }
+    .card-view-mode #svg-container.dragging { cursor: grabbing; }
+
+    /* Sephirah name labels in card view */
+    .cv-seph-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.38px;
+      fill: #c9a84c;
+      text-anchor: middle;
+      dominant-baseline: hanging;
+      pointer-events: none;
+      letter-spacing: 0.04px;
+    }
+
     /* ── Lightbox ── */
     #lightbox {
       display: none;
@@ -409,9 +453,9 @@
       <h1>Tree of Life</h1>
       <p class="subtitle">Click a sephirah or path</p>
       <div class="controls">
-        <span>Compact</span>
-        <input type="range" id="scale-slider" min="1" max="2.5" step="0.05" value="1.5">
-        <span>Spacious</span>
+        <span>Overview</span>
+        <input type="range" id="zoom-slider" min="1" max="5" step="0.1" value="1">
+        <span>Detail</span>
         <button id="view-toggle" onclick="toggleView()">Card View</button>
       </div>
       <div id="svg-container"></div>
@@ -458,8 +502,13 @@
     const SVG_W = 9.1;
     const PAD = 0.1;
 
-    let SCALE_Y = 1.5;
+    const SCALE_Y = 1.5;
     let cardView = false;
+    let zoomLevel = 1;
+    let panX = 0, panY = 0;
+    let cvFullVbW = 0, cvFullVbH = 0;
+    let isPanning = false, didPan = false;
+    let panStart = { x: 0, y: 0, px: 0, py: 0 };
 
     // Card dimensions in SVG units
     const CV = {
@@ -487,14 +536,29 @@
       return { x: s.x, y: s.y * SCALE_Y };
     }
 
+    // Returns the SVG viewBox string centred on (treeCx + panX, treeCy + panY),
+    // zoomed by zoomLevel. Clamped so the viewport never leaves the full tree area.
+    function viewBoxForZoom(fullVbW, fullVbH) {
+      const vbW = fullVbW / zoomLevel;
+      const vbH = fullVbH / zoomLevel;
+      const ys = SEPHIROTH.map(s => s.y * SCALE_Y);
+      const treeCx = SVG_W / 2;
+      const treeCy = (Math.min(...ys) + Math.max(...ys)) / 2;
+      // Clamp centre so viewport stays inside [0, fullVbW] × [0, fullVbH]
+      const cx = Math.max(vbW / 2, Math.min(fullVbW - vbW / 2, treeCx + panX));
+      const cy = Math.max(vbH / 2, Math.min(fullVbH - vbH / 2, treeCy + panY));
+      return `${(cx - vbW / 2).toFixed(3)} ${(cy - vbH / 2).toFixed(3)} ${vbW.toFixed(3)} ${vbH.toFixed(3)}`;
+    }
+
     // ─── SYMBOL VIEW RENDER ───────────────────────────────────────────────────
 
     function render() {
       const maxY = Math.max(...SEPHIROTH.map(s => s.y)) * SCALE_Y;
-      const vbH = maxY + R + PAD * 2 + 0.5;
+      const fullVbH = maxY + R + PAD * 2 + 0.5;
+      const fullVbW = SVG_W + PAD * 2;
 
       const svg = el("svg", {
-        viewBox: `${-PAD} ${-PAD} ${SVG_W + PAD * 2} ${vbH}`,
+        viewBox: viewBoxForZoom(fullVbW, fullVbH),
       });
 
       // Paths (drawn first, behind circles)
@@ -604,47 +668,65 @@
 
     function renderCardView() {
       const maxY = Math.max(...SEPHIROTH.map(s => s.y)) * SCALE_Y;
-      const vbH = maxY + 2 + PAD * 2;
+      cvFullVbH = maxY + 2 + PAD * 2;
+      cvFullVbW = SVG_W + PAD * 2;
+      const fullVbH = cvFullVbH;
+      const fullVbW = cvFullVbW;
 
       const svg = el("svg", {
-        viewBox: `${-PAD} ${-PAD} ${SVG_W + PAD * 2} ${vbH}`,
+        viewBox: viewBoxForZoom(fullVbW, fullVbH),
       });
 
-      // ── Path Atu cards (behind sephiroth clusters) ──
+      // ── Path Atu cards (rotated, with guide lines, behind sephiroth clusters) ──
       for (const path of PATHS) {
         if (!path.atu) continue;
         const a = sephPos(path.from);
         const b = sephPos(path.to);
         const mx = (a.x + b.x) / 2;
         const my = (a.y + b.y) / 2;
-        const x = mx - CV.aw / 2;
-        const y = my - CV.ah / 2;
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const pathAngle = Math.atan2(dy, dx) * 180 / Math.PI;
+        // Rotate so the card's long axis lies along the path direction.
+        // pathAngle is measured from the +X axis; card long axis is the Y axis at 0°,
+        // so subtracting 90° aligns them. All tree paths go downward (dy ≥ 0),
+        // keeping pathAngle in [0°,180°] and cardAngle in [-90°,90°] — never inverted.
+        const cardAngle = pathAngle - 90;
 
         const g = el("g", { class: "cv-path-group", "data-path-n": path.n });
 
-        g.appendChild(el("image", {
+        // Guide line A→B drawn first; sephirah clusters rendered later cover the ends.
+        g.appendChild(el("line", {
+          class: "cv-guide-line",
+          x1: a.x, y1: a.y,
+          x2: b.x, y2: b.y,
+        }));
+
+        // Card group centered at midpoint, rotated along the path
+        const cardG = el("g", {
+          transform: `translate(${mx},${my}) rotate(${cardAngle.toFixed(2)})`,
+        });
+        cardG.appendChild(el("image", {
           class: "cv-path-card",
           href: path.atu.img,
-          x, y,
-          width: CV.aw,
-          height: CV.ah,
+          x: -CV.aw / 2, y: -CV.ah / 2,
+          width: CV.aw, height: CV.ah,
           preserveAspectRatio: "xMidYMid meet",
         }));
-
-        g.appendChild(el("rect", {
+        cardG.appendChild(el("rect", {
           class: "cv-path-frame",
-          x, y, width: CV.aw, height: CV.ah,
+          x: -CV.aw / 2, y: -CV.ah / 2,
+          width: CV.aw, height: CV.ah,
         }));
-
-        // wide transparent hit area
-        g.appendChild(el("rect", {
+        // Hit rect inside the rotated group so it tracks the card exactly
+        cardG.appendChild(el("rect", {
           class: "cv-seph-hit",
-          x: x - 0.1, y: y - 0.1,
-          width: CV.aw + 0.2,
-          height: CV.ah + 0.2,
+          x: -CV.aw / 2, y: -CV.ah / 2,
+          width: CV.aw, height: CV.ah,
         }));
+        g.appendChild(cardG);
 
-        g.addEventListener("click", () => openPathPopup(path));
+        g.addEventListener("click", () => openLightbox(path.atu.img, path.atu.name));
         svg.appendChild(g);
       }
 
@@ -663,30 +745,36 @@
           const row = Math.floor(i / dim.cols);
           const cx2 = startX + col * (dim.cw + CV.gap);
           const cy2 = startY + row * (dim.ch + CV.gap);
-          g.appendChild(el("image", {
+          const imgEl = el("image", {
             class: "cv-card-img",
             href: card.img,
             x: cx2, y: cy2,
             width: dim.cw, height: dim.ch,
             preserveAspectRatio: "xMidYMid meet",
-          }));
+          });
+          imgEl.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openLightbox(card.img, card.name);
+          });
+          g.appendChild(imgEl);
         });
 
-        // border around whole cluster
+        // border around whole cluster (visual grouping only)
         g.appendChild(el("rect", {
           class: "cv-seph-border",
           x: startX, y: startY,
           width: dim.w, height: dim.h,
         }));
 
-        // invisible hit rect
-        g.appendChild(el("rect", {
-          class: "cv-seph-hit",
-          x: startX, y: startY,
-          width: dim.w, height: dim.h,
-        }));
+        // sephirah name below cluster
+        const lbl = el("text", {
+          class: "cv-seph-label",
+          x: s.x,
+          y: startY + dim.h + 0.1,
+        });
+        lbl.textContent = s.label;
+        g.appendChild(lbl);
 
-        g.addEventListener("click", () => openPopup(s));
         svg.appendChild(g);
       }
 
@@ -699,7 +787,9 @@
 
     function toggleView() {
       cardView = !cardView;
+      if (!cardView) { panX = 0; panY = 0; }
       document.getElementById("view-toggle").textContent = cardView ? "Symbol View" : "Card View";
+      document.getElementById("app").classList.toggle("card-view-mode", cardView);
       if (cardView) renderCardView();
       else render();
     }
@@ -793,9 +883,9 @@
 
     // ─── SCALE SLIDER ─────────────────────────────────────────────────────────
 
-    const slider = document.getElementById("scale-slider");
+    const slider = document.getElementById("zoom-slider");
     slider.addEventListener("input", () => {
-      SCALE_Y = parseFloat(slider.value);
+      zoomLevel = parseFloat(slider.value);
       if (cardView) renderCardView();
       else render();
     });
@@ -816,6 +906,66 @@
     }
 
     init();
+
+    // ─── DRAG-TO-PAN (card view only) ─────────────────────────────────────────
+
+    function startPan(clientX, clientY) {
+      isPanning = true;
+      didPan = false;
+      panStart = { x: clientX, y: clientY, px: panX, py: panY };
+      document.getElementById("svg-container").classList.add("dragging");
+    }
+
+    function movePan(clientX, clientY) {
+      if (!isPanning) return;
+      const svgEl = document.querySelector("#svg-container svg");
+      if (!svgEl) return;
+      const ctm = svgEl.getScreenCTM();
+      if (!ctm) return;
+      // ctm.a = screen pixels per SVG unit; invert to get SVG units per pixel
+      const scale = ctm.a;
+      const dx = (clientX - panStart.x) / scale;
+      const dy = (clientY - panStart.y) / scale;
+      if (Math.abs(clientX - panStart.x) > 4 || Math.abs(clientY - panStart.y) > 4) didPan = true;
+      panX = panStart.px - dx;
+      panY = panStart.py - dy;
+      svgEl.setAttribute("viewBox", viewBoxForZoom(cvFullVbW, cvFullVbH));
+    }
+
+    function endPan() {
+      if (!isPanning) return;
+      isPanning = false;
+      document.getElementById("svg-container").classList.remove("dragging");
+    }
+
+    const svgContainer = document.getElementById("svg-container");
+
+    svgContainer.addEventListener("mousedown", e => {
+      if (!cardView) return;
+      e.preventDefault();
+      startPan(e.clientX, e.clientY);
+    });
+    document.addEventListener("mousemove", e => { movePan(e.clientX, e.clientY); });
+    document.addEventListener("mouseup", endPan);
+
+    svgContainer.addEventListener("touchstart", e => {
+      if (!cardView || e.touches.length !== 1) return;
+      startPan(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    svgContainer.addEventListener("touchmove", e => {
+      if (e.touches.length !== 1) return;
+      movePan(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    svgContainer.addEventListener("touchend", endPan, { passive: true });
+
+    // Capture-phase click handler: suppress lightbox if the mousedown was a drag
+    svgContainer.addEventListener("click", e => {
+      if (didPan) {
+        e.stopImmediatePropagation();
+        didPan = false;
+      }
+    }, true);
+
   </script>
 </body>
 </html>
