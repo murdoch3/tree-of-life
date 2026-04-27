@@ -13,7 +13,7 @@
       font-family: 'Cormorant Garamond', Georgia, serif;
       background: #1a1410;
       color: #e8dfc8;
-      overflow: hidden; /* no outer scroll — panels scroll internally */
+      overflow: hidden;
     }
 
     /* ── Layout ── */
@@ -67,6 +67,8 @@
       font-size: 0.75rem;
       color: #8a7a5a;
       letter-spacing: 0.05em;
+      flex-wrap: wrap;
+      justify-content: center;
     }
     .controls input[type=range] {
       -webkit-appearance: none;
@@ -84,6 +86,19 @@
       background: #c9a84c;
       cursor: pointer;
     }
+
+    #view-toggle {
+      font-family: 'Cinzel', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: #8a7a5a;
+      background: none;
+      border: 1px solid #3a2e1e;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    #view-toggle:hover { color: #c9a84c; border-color: #c9a84c; }
 
     #svg-container svg {
       width: 100%;
@@ -173,6 +188,39 @@
     #info-text h2 { font-size: 1.1rem; }
     #info-text h3 { font-size: 0.9rem; color: #8a7a5a; }
 
+    /* ── Card gallery in info panel ── */
+    .card-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 6px;
+    }
+    .card-thumb-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .card-thumb {
+      height: 110px;
+      width: auto;
+      border: 1px solid #3a2e1e;
+      display: block;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .card-thumb:hover { border-color: #c9a84c; transform: scale(1.04); }
+    .card-thumb-name {
+      font-size: 0.62rem;
+      font-family: 'Cinzel', serif;
+      color: #6a5a3a;
+      letter-spacing: 0.04em;
+      text-align: center;
+      max-width: 80px;
+      line-height: 1.3;
+      font-style: normal;
+    }
+
     /* SVG elements */
     .sephirah {
       fill: #1a1410;
@@ -220,6 +268,76 @@
     .path-group:hover .path-label { fill: #c9a84c; }
     .path-group.active .path-line { stroke: #e8c86a; }
     .path-group.active .path-label { fill: #e8c86a; }
+
+    /* ── Card view SVG styles ── */
+    .cv-seph-hit {
+      fill: transparent;
+      stroke: none;
+      cursor: pointer;
+    }
+    .cv-card-img {
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .cv-card-img:hover { opacity: 0.85; }
+    .cv-group:hover .cv-seph-border { stroke: #e8c86a; }
+    .cv-seph-border {
+      fill: none;
+      stroke: #c9a84c;
+      stroke-width: 0.04;
+      pointer-events: none;
+    }
+    .cv-path-group { cursor: pointer; }
+    .cv-path-group:hover .cv-path-card { opacity: 0.85; }
+    .cv-path-card { transition: opacity 0.15s; }
+    .cv-path-frame {
+      fill: none;
+      stroke: #4a3c28;
+      stroke-width: 0.035;
+      pointer-events: none;
+      transition: stroke 0.15s;
+    }
+    .cv-path-group:hover .cv-path-frame { stroke: #c9a84c; }
+    .cv-path-group.active .cv-path-frame { stroke: #e8c86a; }
+    .cv-group.active .cv-seph-border { stroke: #e8c86a; }
+
+    /* ── Lightbox ── */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 8, 5, 0.94);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      cursor: pointer;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox-img {
+      max-height: 80vh;
+      max-width: 88vw;
+      object-fit: contain;
+      box-shadow: 0 0 60px rgba(0,0,0,0.8);
+    }
+    #lightbox-caption {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      color: #8a7a5a;
+    }
+    #lightbox-close {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      font-size: 1.4rem;
+      color: #5a4e38;
+      cursor: pointer;
+      user-select: none;
+      line-height: 1;
+    }
+    #lightbox-close:hover { color: #c9a84c; }
 
     /* Hide back button on desktop */
     #mobile-back { display: none; }
@@ -277,6 +395,8 @@
       }
 
       #info-empty { min-height: 200px; }
+
+      .card-thumb { height: 90px; }
     }
   </style>
 </head>
@@ -292,6 +412,7 @@
         <span>Compact</span>
         <input type="range" id="scale-slider" min="1" max="2.5" step="0.05" value="1.5">
         <span>Spacious</span>
+        <button id="view-toggle" onclick="toggleView()">Card View</button>
       </div>
       <div id="svg-container"></div>
     </div>
@@ -317,20 +438,39 @@
 
   </div>
 
+  <!-- Lightbox -->
+  <div id="lightbox" onclick="closeLightbox()">
+    <span id="lightbox-close" onclick="closeLightbox()">✕</span>
+    <img id="lightbox-img" src="" alt="">
+    <div id="lightbox-caption"></div>
+  </div>
+
   <script>
-    // ─── DATA (loaded from data.json) ────────────────────────────────────────
+    // ─── DATA ────────────────────────────────────────────────────────────────
 
     let SEPHIROTH = [];
     let PATHS = [];
 
     // ─── CONFIG ───────────────────────────────────────────────────────────────
 
-    const R = 1.2;       // sephirah radius
-    const GAP = 0.65;    // half-gap either side of path label
-    const SVG_W = 9.1;   // viewBox width (before padding)
-    const PAD = 0.1;     // viewBox padding
+    const R = 1.2;
+    const GAP = 0.65;
+    const SVG_W = 9.1;
+    const PAD = 0.1;
 
     let SCALE_Y = 1.5;
+    let cardView = false;
+
+    // Card dimensions in SVG units
+    const CV = {
+      // small cards for 4-card 2×2 clusters
+      sw: 0.55, sh: 0.825,
+      // wide cards for 8-card 4×2 clusters
+      ww: 0.46, wh: 0.69,
+      gap: 0.04,
+      // Atu card on path
+      aw: 0.65, ah: 0.975,
+    };
 
     // ─── HELPERS ──────────────────────────────────────────────────────────────
 
@@ -347,17 +487,17 @@
       return { x: s.x, y: s.y * SCALE_Y };
     }
 
-    // ─── RENDER ───────────────────────────────────────────────────────────────
+    // ─── SYMBOL VIEW RENDER ───────────────────────────────────────────────────
 
     function render() {
       const maxY = Math.max(...SEPHIROTH.map(s => s.y)) * SCALE_Y;
-      const vbH = maxY + R + PAD * 2 + 0.5; // a little bottom breathing room
+      const vbH = maxY + R + PAD * 2 + 0.5;
 
       const svg = el("svg", {
         viewBox: `${-PAD} ${-PAD} ${SVG_W + PAD * 2} ${vbH}`,
       });
 
-      // ── Paths (drawn first, behind circles) ──
+      // Paths (drawn first, behind circles)
       const pathsG = el("g", { id: "paths" });
 
       for (const path of PATHS) {
@@ -371,7 +511,6 @@
         let angle = Math.atan2(dy, dx) * 180 / Math.PI;
         if (angle > 90 || angle < -90) angle += 180;
 
-        // Local x coords: path runs from -dist/2 to +dist/2
         const l1x1 = -(dist / 2 - R);
         const l1x2 = -GAP;
         const l2x1 =  GAP;
@@ -383,7 +522,6 @@
           "data-path-n": path.n,
         });
 
-        // Invisible wide hit area covering the full path length
         g.appendChild(el("rect", {
           class: "path-hit",
           x: -(dist / 2 - R),
@@ -392,7 +530,6 @@
           height: 0.8,
         }));
 
-        // Only draw lines if there's room
         if (l1x2 > l1x1) {
           g.appendChild(el("line", { class: "path-line", x1: l1x1, y1: 0, x2: l1x2, y2: 0 }));
           g.appendChild(el("line", { class: "path-line", x1: l2x1, y1: 0, x2: l2x2, y2: 0 }));
@@ -408,7 +545,7 @@
 
       svg.appendChild(pathsG);
 
-      // ── Sephiroth ──
+      // Sephiroth
       const sephG = el("g", { id: "sephiroth" });
 
       for (const s of SEPHIROTH) {
@@ -424,22 +561,18 @@
         circle.addEventListener("click", () => openPopup(s));
         sephG.appendChild(circle);
 
-        // Number (smaller, above centre)
         const numText = el("text", {
           class: "seph-label seph-number",
-          x: s.x,
-          y: cy - 0.28,
+          x: s.x, y: cy - 0.28,
         });
         numText.setAttribute("text-anchor", "middle");
         numText.setAttribute("dominant-baseline", "middle");
         numText.textContent = s.n;
         sephG.appendChild(numText);
 
-        // Name (below centre)
         const nameText = el("text", {
           class: "seph-label",
-          x: s.x,
-          y: cy + 0.27,
+          x: s.x, y: cy + 0.27,
         });
         nameText.setAttribute("text-anchor", "middle");
         nameText.setAttribute("dominant-baseline", "middle");
@@ -449,23 +582,163 @@
 
       svg.appendChild(sephG);
 
-      // Replace old SVG
       const container = document.getElementById("svg-container");
       container.innerHTML = "";
       container.appendChild(svg);
     }
 
+    // ─── CARD VIEW RENDER ─────────────────────────────────────────────────────
+
+    function clusterDims(cards) {
+      // 8-card: 4 cols × 2 rows; 4-card: 2 cols × 2 rows
+      const cols = cards.length > 4 ? 4 : 2;
+      const rows = Math.ceil(cards.length / cols);
+      const cw = cards.length > 4 ? CV.ww : CV.sw;
+      const ch = cards.length > 4 ? CV.wh : CV.sh;
+      return {
+        cols, rows, cw, ch,
+        w: cols * cw + (cols - 1) * CV.gap,
+        h: rows * ch + (rows - 1) * CV.gap,
+      };
+    }
+
+    function renderCardView() {
+      const maxY = Math.max(...SEPHIROTH.map(s => s.y)) * SCALE_Y;
+      const vbH = maxY + 2 + PAD * 2;
+
+      const svg = el("svg", {
+        viewBox: `${-PAD} ${-PAD} ${SVG_W + PAD * 2} ${vbH}`,
+      });
+
+      // ── Path Atu cards (behind sephiroth clusters) ──
+      for (const path of PATHS) {
+        if (!path.atu) continue;
+        const a = sephPos(path.from);
+        const b = sephPos(path.to);
+        const mx = (a.x + b.x) / 2;
+        const my = (a.y + b.y) / 2;
+        const x = mx - CV.aw / 2;
+        const y = my - CV.ah / 2;
+
+        const g = el("g", { class: "cv-path-group", "data-path-n": path.n });
+
+        g.appendChild(el("image", {
+          class: "cv-path-card",
+          href: path.atu.img,
+          x, y,
+          width: CV.aw,
+          height: CV.ah,
+          preserveAspectRatio: "xMidYMid meet",
+        }));
+
+        g.appendChild(el("rect", {
+          class: "cv-path-frame",
+          x, y, width: CV.aw, height: CV.ah,
+        }));
+
+        // wide transparent hit area
+        g.appendChild(el("rect", {
+          class: "cv-seph-hit",
+          x: x - 0.1, y: y - 0.1,
+          width: CV.aw + 0.2,
+          height: CV.ah + 0.2,
+        }));
+
+        g.addEventListener("click", () => openPathPopup(path));
+        svg.appendChild(g);
+      }
+
+      // ── Sephirah card clusters ──
+      for (const s of SEPHIROTH) {
+        if (!s.cards || !s.cards.length) continue;
+        const cy = s.y * SCALE_Y;
+        const dim = clusterDims(s.cards);
+        const startX = s.x - dim.w / 2;
+        const startY = cy - dim.h / 2;
+
+        const g = el("g", { class: "cv-group", "data-seph-id": s.id });
+
+        s.cards.forEach((card, i) => {
+          const col = i % dim.cols;
+          const row = Math.floor(i / dim.cols);
+          const cx2 = startX + col * (dim.cw + CV.gap);
+          const cy2 = startY + row * (dim.ch + CV.gap);
+          g.appendChild(el("image", {
+            class: "cv-card-img",
+            href: card.img,
+            x: cx2, y: cy2,
+            width: dim.cw, height: dim.ch,
+            preserveAspectRatio: "xMidYMid meet",
+          }));
+        });
+
+        // border around whole cluster
+        g.appendChild(el("rect", {
+          class: "cv-seph-border",
+          x: startX, y: startY,
+          width: dim.w, height: dim.h,
+        }));
+
+        // invisible hit rect
+        g.appendChild(el("rect", {
+          class: "cv-seph-hit",
+          x: startX, y: startY,
+          width: dim.w, height: dim.h,
+        }));
+
+        g.addEventListener("click", () => openPopup(s));
+        svg.appendChild(g);
+      }
+
+      const container = document.getElementById("svg-container");
+      container.innerHTML = "";
+      container.appendChild(svg);
+    }
+
+    // ─── VIEW TOGGLE ──────────────────────────────────────────────────────────
+
+    function toggleView() {
+      cardView = !cardView;
+      document.getElementById("view-toggle").textContent = cardView ? "Symbol View" : "Card View";
+      if (cardView) renderCardView();
+      else render();
+    }
+
     // ─── INFO PANEL ───────────────────────────────────────────────────────────
 
+    function renderCardGallery(cards) {
+      return `<div class="card-gallery">${cards.map(c =>
+        `<div class="card-thumb-wrap" onclick="openLightbox('${c.img}','${c.name}')">
+          <img class="card-thumb" src="${c.img}" alt="${c.name}" loading="lazy">
+          <span class="card-thumb-name">${c.name}</span>
+        </div>`
+      ).join("")}</div>`;
+    }
+
     function renderContent(item) {
-      // If item has a structured fields array, render that.
-      // Otherwise fall back to raw HTML in item.text.
-      if (item.fields && item.fields.length) {
-        return item.fields.map(f =>
-          `<p><strong>${f.label}</strong><br>${f.value}</p>`
-        ).join("");
+      let html = "";
+
+      // For paths: show Atu card before notes
+      if (item.atu) {
+        html += `<p><strong>Trump</strong><br>${item.atu.name}</p>`;
+        html += renderCardGallery([item.atu]);
       }
-      return item.text || "<p>No notes yet.</p>";
+
+      if (item.fields && item.fields.length) {
+        html += item.fields.map(f => {
+          let out = `<p><strong>${f.label}</strong><br>${f.value}</p>`;
+          if (f.label === "Tarot Correspondence" && item.cards && item.cards.length) {
+            out += renderCardGallery(item.cards);
+          }
+          return out;
+        }).join("");
+      } else if (!item.atu) {
+        html += item.text || "<p>No notes yet.</p>";
+      } else {
+        html += item.text || "";
+      }
+
+      return html;
     }
 
     const mobileQuery = window.matchMedia("(max-width: 700px)");
@@ -488,24 +761,43 @@
 
     function openPathPopup(path) {
       showInfo(`PATH ${path.n}`, `${path.letter} — ${path.heb}`, path);
-      document.querySelectorAll(".sephirah").forEach(c => c.classList.remove("active"));
-      document.querySelectorAll(".path-group").forEach(g => g.classList.remove("active"));
+      document.querySelectorAll(".sephirah, .cv-group").forEach(c => c.classList.remove("active"));
+      document.querySelectorAll(".path-group, .cv-path-group").forEach(g => g.classList.remove("active"));
       document.querySelector(`.path-group[data-path-n="${path.n}"]`)?.classList.add("active");
+      document.querySelector(`.cv-path-group[data-path-n="${path.n}"]`)?.classList.add("active");
     }
 
     function openPopup(s) {
       showInfo(`SEPHIRAH ${s.n}`, s.title, s);
-      document.querySelectorAll(".sephirah").forEach(c => c.classList.remove("active"));
-      document.querySelectorAll(".path-group").forEach(g => g.classList.remove("active"));
+      document.querySelectorAll(".sephirah, .cv-group").forEach(c => c.classList.remove("active"));
+      document.querySelectorAll(".path-group, .cv-path-group").forEach(g => g.classList.remove("active"));
       document.getElementById(s.id)?.classList.add("active");
+      document.querySelector(`.cv-group[data-seph-id="${s.id}"]`)?.classList.add("active");
     }
+
+    // ─── LIGHTBOX ─────────────────────────────────────────────────────────────
+
+    function openLightbox(src, caption) {
+      document.getElementById("lightbox-img").src = src;
+      document.getElementById("lightbox-caption").textContent = caption;
+      document.getElementById("lightbox").classList.add("open");
+    }
+
+    function closeLightbox() {
+      document.getElementById("lightbox").classList.remove("open");
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") closeLightbox();
+    });
 
     // ─── SCALE SLIDER ─────────────────────────────────────────────────────────
 
     const slider = document.getElementById("scale-slider");
     slider.addEventListener("input", () => {
       SCALE_Y = parseFloat(slider.value);
-      render();
+      if (cardView) renderCardView();
+      else render();
     });
 
     // ─── INIT ─────────────────────────────────────────────────────────────────
