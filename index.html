@@ -4,15 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tree of Life</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
   <style>
+    /* ── Palette: #000011 bg, #000033 panel, #00BFFF cyan, #00CED1 link ── */
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
       height: 100%;
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      background: #1a1410;
-      color: #e8dfc8;
+      font-family: 'Anonymous Pro', 'Courier New', monospace;
+      background-color: #000011;
+      background-image: url("imgs/stars3.gif"); /* swap path to match your server layout */
+      color: #00BFFF;
       overflow: hidden;
     }
 
@@ -31,29 +36,47 @@
       width: 420px;
       min-width: 280px;
       flex-shrink: 0;
-      border-right: 1px solid #2e2518;
+      background: rgba(0,0,33,0.55);
+      border-right: none;
       overflow-y: auto;
       padding: 32px 16px 32px;
       scrollbar-width: thin;
-      scrollbar-color: #3a2e1e transparent;
+      scrollbar-color: #003366 transparent;
     }
     #left::-webkit-scrollbar { width: 4px; }
-    #left::-webkit-scrollbar-thumb { background: #3a2e1e; border-radius: 2px; }
+    #left::-webkit-scrollbar-thumb { background: #003366; border-radius: 2px; }
+
+    #divider {
+      width: 4px;
+      flex-shrink: 0;
+      background: #00BFFF;
+      cursor: col-resize;
+      transition: background 0.2s;
+      position: relative;
+      z-index: 10;
+    }
+    #divider:hover, #divider.dragging { background: #7edfff; }
+    #divider::after {
+      content: '';
+      position: absolute;
+      inset: 0 -6px;
+    }
 
     #left h1 {
-      font-family: 'Cinzel', serif;
-      font-size: 1.4rem;
-      font-weight: 400;
-      letter-spacing: 0.2em;
-      color: #c9a84c;
+      font-family: 'Anonymous Pro', monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #00BFFF;
       text-align: center;
       margin-bottom: 4px;
+      text-transform: uppercase;
     }
 
     .subtitle {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-style: italic;
-      color: #8a7a5a;
+      color: #005580;
       letter-spacing: 0.08em;
       margin-bottom: 20px;
       text-align: center;
@@ -64,8 +87,8 @@
       align-items: center;
       gap: 12px;
       margin-bottom: 20px;
-      font-size: 0.75rem;
-      color: #8a7a5a;
+      font-size: 0.72rem;
+      color: #005580;
       letter-spacing: 0.05em;
       flex-wrap: wrap;
       justify-content: center;
@@ -74,7 +97,7 @@
       -webkit-appearance: none;
       width: 100px;
       height: 2px;
-      background: #3a2e1e;
+      background: #003366;
       outline: none;
       border-radius: 2px;
     }
@@ -83,22 +106,23 @@
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      background: #c9a84c;
+      background: #00BFFF;
       cursor: pointer;
     }
 
-    #view-toggle {
-      font-family: 'Cinzel', serif;
+    #view-toggle, #study-toggle {
+      font-family: 'Anonymous Pro', monospace;
       font-size: 0.65rem;
-      letter-spacing: 0.12em;
-      color: #8a7a5a;
-      background: none;
-      border: 1px solid #3a2e1e;
+      letter-spacing: 0.1em;
+      color: #005580;
+      background: rgba(0,0,51,0.6);
+      border: 1px solid #003366;
       padding: 4px 10px;
       cursor: pointer;
       transition: color 0.2s, border-color 0.2s;
     }
-    #view-toggle:hover { color: #c9a84c; border-color: #c9a84c; }
+    #view-toggle:hover, #study-toggle:hover { color: #00BFFF; border-color: #00BFFF; }
+    #study-toggle.active { color: #00BFFF; border-color: #00BFFF; }
 
     #svg-container svg {
       width: 100%;
@@ -112,6 +136,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      background: linear-gradient(to bottom right, #000033, #000011);
     }
 
     #info-panel {
@@ -119,10 +144,10 @@
       overflow-y: auto;
       padding: 48px 56px;
       scrollbar-width: thin;
-      scrollbar-color: #3a2e1e transparent;
+      scrollbar-color: #003366 transparent;
     }
     #info-panel::-webkit-scrollbar { width: 4px; }
-    #info-panel::-webkit-scrollbar-thumb { background: #3a2e1e; border-radius: 2px; }
+    #info-panel::-webkit-scrollbar-thumb { background: #003366; border-radius: 2px; }
 
     /* Empty state */
     #info-empty {
@@ -130,8 +155,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #3a2e1e;
-      font-size: 1.1rem;
+      color: #002244;
+      font-size: 0.9rem;
       font-style: italic;
       letter-spacing: 0.1em;
       user-select: none;
@@ -142,51 +167,52 @@
     #info-content.visible { display: block; }
 
     #info-label {
-      font-family: 'Cinzel', serif;
-      font-size: 0.7rem;
-      color: #5a4e38;
+      font-family: 'Anonymous Pro', monospace;
+      font-size: 0.65rem;
+      color: #005580;
       letter-spacing: 0.25em;
       margin-bottom: 8px;
+      text-transform: uppercase;
     }
     #info-title {
-      font-family: 'Cinzel', serif;
-      font-size: 2.2rem;
-      font-weight: 600;
-      color: #c9a84c;
+      font-family: 'Anonymous Pro', monospace;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: #00BFFF;
       margin-bottom: 20px;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.05em;
       line-height: 1.2;
     }
     .info-divider {
       width: 48px;
-      height: 1px;
-      background: #c9a84c;
+      height: 2px;
+      background: #00BFFF;
       margin-bottom: 24px;
       opacity: 0.4;
     }
     #info-text {
-      font-size: 1.1rem;
+      font-size: 0.95rem;
       line-height: 1.8;
-      color: #c8bfa8;
-      font-style: italic;
+      color: #7ecfef;
     }
     #info-text p { margin-bottom: 1.1em; }
     #info-text p:last-child { margin-bottom: 0; }
     #info-text strong {
-      color: #c9a84c;
-      font-style: normal;
+      color: #00BFFF;
+      font-weight: 700;
     }
-    #info-text em { color: #a89878; }
+    #info-text em { color: #00CED1; }
     #info-text h2, #info-text h3 {
-      font-family: 'Cinzel', serif;
+      font-family: 'Anonymous Pro', monospace;
       font-style: normal;
-      color: #c9a84c;
-      font-weight: 400;
+      color: #00BFFF;
+      font-weight: 700;
       margin: 1.2em 0 0.5em;
       letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
-    #info-text h2 { font-size: 1.1rem; }
-    #info-text h3 { font-size: 0.9rem; color: #8a7a5a; }
+    #info-text h2 { font-size: 0.95rem; }
+    #info-text h3 { font-size: 0.8rem; color: #005580; }
 
     /* ── Card gallery in info panel ── */
     .card-gallery {
@@ -205,58 +231,57 @@
     .card-thumb {
       height: 110px;
       width: auto;
-      border: 1px solid #3a2e1e;
+      border: 1px solid #003366;
       display: block;
       transition: border-color 0.2s, transform 0.15s;
     }
-    .card-thumb:hover { border-color: #c9a84c; transform: scale(1.04); }
+    .card-thumb:hover { border-color: #00BFFF; transform: scale(1.04); }
     .card-thumb-name {
-      font-size: 0.62rem;
-      font-family: 'Cinzel', serif;
-      color: #6a5a3a;
+      font-size: 0.58rem;
+      font-family: 'Anonymous Pro', monospace;
+      color: #005580;
       letter-spacing: 0.04em;
       text-align: center;
       max-width: 80px;
       line-height: 1.3;
-      font-style: normal;
     }
 
     /* SVG elements */
     .sephirah {
-      fill: #1a1410;
-      stroke: #c9a84c;
+      fill: #000022;
+      stroke: #00BFFF;
       stroke-width: 0.06;
       cursor: pointer;
       transition: fill 0.2s;
     }
-    .sephirah:hover { fill: #2e2210; }
-    .sephirah.active { fill: #2a1f0a; stroke: #e8c86a; }
+    .sephirah:hover { fill: #001133; }
+    .sephirah.active { fill: #001a44; stroke: #7edfff; }
 
     .seph-label {
-      font-family: 'Cinzel', serif;
-      font-size: 0.48px;
+      font-family: 'Anonymous Pro', monospace;
+      font-size: 0.44px;
       text-anchor: middle;
       dominant-baseline: middle;
       pointer-events: none;
-      fill: #c9a84c;
+      fill: #00BFFF;
     }
     .seph-number {
-      font-size: 0.38px;
-      fill: #8a7a5a;
+      font-size: 0.36px;
+      fill: #005580;
     }
 
     .path-line {
-      stroke: #4a3c28;
+      stroke: #003366;
       stroke-width: 0.08;
       transition: stroke 0.2s;
     }
     .path-label {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.42px;
+      font-family: 'Anonymous Pro', monospace;
+      font-size: 0.38px;
       text-anchor: middle;
       dominant-baseline: middle;
       pointer-events: none;
-      fill: #7a6a4a;
+      fill: #005580;
       transition: fill 0.2s;
     }
     .path-hit {
@@ -264,10 +289,10 @@
       stroke: none;
       cursor: pointer;
     }
-    .path-group:hover .path-line { stroke: #c9a84c; }
-    .path-group:hover .path-label { fill: #c9a84c; }
-    .path-group.active .path-line { stroke: #e8c86a; }
-    .path-group.active .path-label { fill: #e8c86a; }
+    .path-group:hover .path-line { stroke: #00BFFF; }
+    .path-group:hover .path-label { fill: #00BFFF; }
+    .path-group.active .path-line { stroke: #7edfff; }
+    .path-group.active .path-label { fill: #7edfff; }
 
     /* ── Card view SVG styles ── */
     .cv-seph-hit {
@@ -280,10 +305,10 @@
       transition: opacity 0.15s;
     }
     .cv-card-img:hover { opacity: 0.85; }
-    .cv-group:hover .cv-seph-border { stroke: #e8c86a; }
+    .cv-group:hover .cv-seph-border { stroke: #7edfff; }
     .cv-seph-border {
       fill: none;
-      stroke: #c9a84c;
+      stroke: #00BFFF;
       stroke-width: 0.04;
       pointer-events: none;
     }
@@ -292,23 +317,23 @@
     .cv-path-card { transition: opacity 0.15s; }
     .cv-path-frame {
       fill: none;
-      stroke: #4a3c28;
+      stroke: #003366;
       stroke-width: 0.035;
       pointer-events: none;
       transition: stroke 0.15s;
     }
-    .cv-path-group:hover .cv-path-frame { stroke: #c9a84c; }
-    .cv-path-group.active .cv-path-frame { stroke: #e8c86a; }
-    .cv-group.active .cv-seph-border { stroke: #e8c86a; }
+    .cv-path-group:hover .cv-path-frame { stroke: #00BFFF; }
+    .cv-path-group.active .cv-path-frame { stroke: #7edfff; }
+    .cv-group.active .cv-seph-border { stroke: #7edfff; }
 
     /* ── Guide lines in card view ── */
     .cv-guide-line {
-      stroke: #2e2518;
+      stroke: #002244;
       stroke-width: 0.055;
       stroke-dasharray: 0.18 0.1;
     }
-    .cv-path-group:hover .cv-guide-line { stroke: #7a6a4a; }
-    .cv-path-group.active .cv-guide-line { stroke: #c9a84c; }
+    .cv-path-group:hover .cv-guide-line { stroke: #005580; }
+    .cv-path-group.active .cv-guide-line { stroke: #00BFFF; }
 
     /* ── Card view: full-screen, fixed height, no info panel ── */
     .card-view-mode #right { display: none; }
@@ -319,8 +344,6 @@
       padding: 16px 24px 0;
       overflow: hidden;
     }
-    /* flex: 1 + min-height: 0 lets the container grow to fill remaining panel
-       height without overflowing; SVG height: 100% then fills it exactly */
     .card-view-mode #svg-container {
       flex: 1;
       width: 100%;
@@ -336,13 +359,13 @@
 
     /* Sephirah name labels in card view */
     .cv-seph-label {
-      font-family: 'Cinzel', serif;
-      font-size: 0.38px;
-      fill: #c9a84c;
+      font-family: 'Anonymous Pro', monospace;
+      font-size: 0.35px;
+      fill: #00BFFF;
       text-anchor: middle;
       dominant-baseline: hanging;
       pointer-events: none;
-      letter-spacing: 0.04px;
+      letter-spacing: 0.03px;
     }
 
     /* ── Lightbox ── */
@@ -350,7 +373,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(10, 8, 5, 0.94);
+      background: rgba(0, 0, 17, 0.95);
       z-index: 1000;
       align-items: center;
       justify-content: center;
@@ -363,25 +386,25 @@
       max-height: 80vh;
       max-width: 88vw;
       object-fit: contain;
-      box-shadow: 0 0 60px rgba(0,0,0,0.8);
+      box-shadow: 0 0 40px rgba(0, 191, 255, 0.2);
     }
     #lightbox-caption {
-      font-family: 'Cinzel', serif;
-      font-size: 0.8rem;
+      font-family: 'Anonymous Pro', monospace;
+      font-size: 0.75rem;
       letter-spacing: 0.2em;
-      color: #8a7a5a;
+      color: #005580;
     }
     #lightbox-close {
       position: fixed;
       top: 20px;
       right: 24px;
       font-size: 1.4rem;
-      color: #5a4e38;
+      color: #005580;
       cursor: pointer;
       user-select: none;
       line-height: 1;
     }
-    #lightbox-close:hover { color: #c9a84c; }
+    #lightbox-close:hover { color: #00BFFF; }
 
     /* Hide back button on desktop */
     #mobile-back { display: none; }
@@ -420,16 +443,16 @@
         align-items: center;
         gap: 8px;
         padding: 16px 20px;
-        font-family: 'Cinzel', serif;
+        font-family: 'Anonymous Pro', monospace;
         font-size: 0.7rem;
         letter-spacing: 0.15em;
-        color: #8a7a5a;
-        border-bottom: 1px solid #2e2518;
+        color: #005580;
+        border-bottom: 2px solid #003366;
         cursor: pointer;
         user-select: none;
         flex-shrink: 0;
       }
-      #mobile-back:active { color: #c9a84c; }
+      #mobile-back:active { color: #00BFFF; }
       #mobile-back svg { width: 14px; height: 14px; }
 
       #info-panel {
@@ -457,9 +480,13 @@
         <input type="range" id="zoom-slider" min="1" max="5" step="0.1" value="1">
         <span>Detail</span>
         <button id="view-toggle" onclick="toggleView()">Card View</button>
+        <button id="study-toggle" onclick="toggleStudy()">Study</button>
       </div>
       <div id="svg-container"></div>
     </div>
+
+    <!-- Drag divider -->
+    <div id="divider"></div>
 
     <!-- Right: Info -->
     <div id="right">
@@ -477,6 +504,9 @@
           <div class="info-divider"></div>
           <div id="info-text"></div>
         </div>
+      </div>
+
+      <div id="study-panel" style="display:none;flex:1;overflow-y:auto;padding:32px 40px 48px;scrollbar-width:thin;scrollbar-color:#003366 transparent;">
       </div>
     </div>
 
@@ -908,6 +938,439 @@
     init();
 
     // ─── DRAG-TO-PAN (card view only) ─────────────────────────────────────────
+
+    function startPan(clientX, clientY) {
+      isPanning = true;
+      didPan = false;
+      panStart = { x: clientX, y: clientY, px: panX, py: panY };
+      document.getElementById("svg-container").classList.add("dragging");
+    }
+
+    function movePan(clientX, clientY) {
+      if (!isPanning) return;
+      const svgEl = document.querySelector("#svg-container svg");
+      if (!svgEl) return;
+      const ctm = svgEl.getScreenCTM();
+      if (!ctm) return;
+      const scale = ctm.a;
+      const dx = (clientX - panStart.x) / scale;
+      const dy = (clientY - panStart.y) / scale;
+      if (Math.abs(clientX - panStart.x) > 4 || Math.abs(clientY - panStart.y) > 4) didPan = true;
+      panX = panStart.px - dx;
+      panY = panStart.py - dy;
+      svgEl.setAttribute("viewBox", viewBoxForZoom(cvFullVbW, cvFullVbH));
+    }
+
+    function endPan() {
+      if (!isPanning) return;
+      isPanning = false;
+      document.getElementById("svg-container").classList.remove("dragging");
+    }
+
+    const svgContainer = document.getElementById("svg-container");
+
+    svgContainer.addEventListener("mousedown", e => {
+      if (!cardView) return;
+      e.preventDefault();
+      startPan(e.clientX, e.clientY);
+    });
+    document.addEventListener("mousemove", e => { movePan(e.clientX, e.clientY); });
+    document.addEventListener("mouseup", endPan);
+
+    svgContainer.addEventListener("touchstart", e => {
+      if (!cardView || e.touches.length !== 1) return;
+      startPan(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    svgContainer.addEventListener("touchmove", e => {
+      if (e.touches.length !== 1) return;
+      movePan(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    svgContainer.addEventListener("touchend", endPan, { passive: true });
+
+    svgContainer.addEventListener("click", e => {
+      if (didPan) {
+        e.stopImmediatePropagation();
+        didPan = false;
+      }
+    }, true);
+
+    // ─── DIVIDER DRAG ─────────────────────────────────────────────────────────
+
+    (function () {
+      const divider = document.getElementById('divider');
+      const left = document.getElementById('left');
+      let dragging = false;
+
+      divider.addEventListener('mousedown', e => {
+        dragging = true;
+        divider.classList.add('dragging');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        const app = document.getElementById('app');
+        const appRect = app.getBoundingClientRect();
+        const min = 200;
+        const max = appRect.width - 200;
+        const newW = Math.min(max, Math.max(min, e.clientX - appRect.left));
+        left.style.width = newW + 'px';
+        // keep card view svg updated if active
+        if (typeof cardView !== 'undefined' && cardView) renderCardView();
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (!dragging) return;
+        dragging = false;
+        divider.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      });
+
+      // Touch support
+      divider.addEventListener('touchstart', e => {
+        dragging = true;
+        e.preventDefault();
+      }, { passive: false });
+
+      document.addEventListener('touchmove', e => {
+        if (!dragging || e.touches.length !== 1) return;
+        const app = document.getElementById('app');
+        const appRect = app.getBoundingClientRect();
+        const min = 200;
+        const max = appRect.width - 200;
+        const newW = Math.min(max, Math.max(min, e.touches[0].clientX - appRect.left));
+        left.style.width = newW + 'px';
+      }, { passive: true });
+
+      document.addEventListener('touchend', () => { dragging = false; });
+    })();
+
+    // ─── STUDY MODE ───────────────────────────────────────────────────────────
+
+    let studyMode = false;
+
+    function toggleStudy() {
+      studyMode = !studyMode;
+      const btn = document.getElementById('study-toggle');
+      const infoPanel = document.getElementById('info-panel');
+      const studyPanel = document.getElementById('study-panel');
+      const viewToggle = document.getElementById('view-toggle');
+
+      if (studyMode) {
+        btn.classList.add('active');
+        btn.textContent = 'Tree';
+        infoPanel.style.display = 'none';
+        studyPanel.style.display = 'block';
+        viewToggle.style.display = 'none';
+        // Exit card view if active
+        if (cardView) { cardView = false; render(); }
+        initStudy();
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = 'Study';
+        infoPanel.style.display = '';
+        studyPanel.style.display = 'none';
+        viewToggle.style.display = '';
+      }
+    }
+
+    // ── Study data ──────────────────────────────────────────────────────────
+
+    const STUDY_SEP = [
+      {id:'kether',n:1,name:'Kether',meaning:'Crown',divineName:'Eheieh',archangel:'Metatron',angelicOrder:'Chaioth ha-Qodesh',astro:'Primum Mobile',tarot:'The four Aces'},
+      {id:'chokmah',n:2,name:'Chokmah',meaning:'Wisdom',divineName:'Yah',archangel:'Raziel',angelicOrder:'Auphanim',astro:'The Zodiac',tarot:'Four Twos & four Knights'},
+      {id:'binah',n:3,name:'Binah',meaning:'Understanding',divineName:'YHVH Elohim',archangel:'Tzaphqiel',angelicOrder:'Aralim',astro:'Saturn',tarot:'Four Threes & four Queens'},
+      {id:'chesed',n:4,name:'Chesed',meaning:'Mercy',divineName:'El',archangel:'Tzadkiel',angelicOrder:'Chashmalim',astro:'Jupiter',tarot:'The four Fours'},
+      {id:'geburah',n:5,name:'Geburah',meaning:'Severity',divineName:'Elohim Gibor',archangel:'Kamael',angelicOrder:'Seraphim',astro:'Mars',tarot:'The four Fives'},
+      {id:'tiphareth',n:6,name:'Tiphareth',meaning:'Beauty',divineName:'YHVH Eloah va-Daath',archangel:'Michael',angelicOrder:'Malakim',astro:'The Sun',tarot:'Four Sixes & four Princes'},
+      {id:'netzach',n:7,name:'Netzach',meaning:'Victory',divineName:'YHVH Tzabaoth',archangel:'Haniel',angelicOrder:'Tarshishim',astro:'Venus',tarot:'The four Sevens'},
+      {id:'hod',n:8,name:'Hod',meaning:'Splendour',divineName:'Elohim Tzabaoth',archangel:'Raphael',angelicOrder:'Beni Elohim',astro:'Mercury',tarot:'The four Eights'},
+      {id:'yesod',n:9,name:'Yesod',meaning:'Foundation',divineName:'Shaddai El Chai',archangel:'Gabriel',angelicOrder:'Kerubim',astro:'The Moon',tarot:'The four Nines'},
+      {id:'malkuth',n:10,name:'Malkuth',meaning:'Kingdom',divineName:'Adonai',archangel:'Metatron & Sandalphon',angelicOrder:'Ishim',astro:'Sphere of the Elements',tarot:'Four Tens & four Princesses'},
+    ];
+
+    const STUDY_PATH_ASTRO = {11:'Air',12:'Mercury',13:'Moon',14:'Venus',15:'Aquarius',16:'Taurus',17:'Gemini',18:'Cancer',19:'Leo',20:'Virgo',21:'Jupiter',22:'Libra',23:'Water',24:'Scorpio',25:'Sagittarius',26:'Capricorn',27:'Mars',28:'Aries',29:'Pisces',30:'Sun',31:'Fire',32:'Saturn'};
+
+    const STUDY_PATHS = [
+      {n:11,from:'Kether',to:'Chokmah',letter:'Aleph',heb:'א',tarot:'Atu 0 — The Fool',astro:STUDY_PATH_ASTRO[11]},
+      {n:12,from:'Kether',to:'Binah',letter:'Beth',heb:'ב',tarot:'Atu I — The Magus',astro:STUDY_PATH_ASTRO[12]},
+      {n:13,from:'Kether',to:'Tiphareth',letter:'Gimel',heb:'ג',tarot:'Atu II — The Priestess',astro:STUDY_PATH_ASTRO[13]},
+      {n:14,from:'Chokmah',to:'Binah',letter:'Daleth',heb:'ד',tarot:'Atu III — The Empress',astro:STUDY_PATH_ASTRO[14]},
+      {n:15,from:'Chokmah',to:'Tiphareth',letter:'Heh',heb:'ה',tarot:'Atu XVII — The Star',astro:STUDY_PATH_ASTRO[15]},
+      {n:16,from:'Chokmah',to:'Chesed',letter:'Vav',heb:'ו',tarot:'Atu V — The Hierophant',astro:STUDY_PATH_ASTRO[16]},
+      {n:17,from:'Binah',to:'Tiphareth',letter:'Zayin',heb:'ז',tarot:'Atu VI — The Lovers',astro:STUDY_PATH_ASTRO[17]},
+      {n:18,from:'Binah',to:'Geburah',letter:'Cheth',heb:'ח',tarot:'Atu VII — The Chariot',astro:STUDY_PATH_ASTRO[18]},
+      {n:19,from:'Chesed',to:'Geburah',letter:'Teth',heb:'ט',tarot:'Atu XI — Lust',astro:STUDY_PATH_ASTRO[19]},
+      {n:20,from:'Chesed',to:'Tiphareth',letter:'Yod',heb:'י',tarot:'Atu IX — The Hermit',astro:STUDY_PATH_ASTRO[20]},
+      {n:21,from:'Chesed',to:'Netzach',letter:'Kaph',heb:'כ',tarot:'Atu X — Fortune',astro:STUDY_PATH_ASTRO[21]},
+      {n:22,from:'Geburah',to:'Tiphareth',letter:'Lamed',heb:'ל',tarot:'Atu VIII — Adjustment',astro:STUDY_PATH_ASTRO[22]},
+      {n:23,from:'Geburah',to:'Hod',letter:'Mem',heb:'מ',tarot:'Atu XII — The Hanged Man',astro:STUDY_PATH_ASTRO[23]},
+      {n:24,from:'Tiphareth',to:'Netzach',letter:'Nun',heb:'נ',tarot:'Atu XIII — Death',astro:STUDY_PATH_ASTRO[24]},
+      {n:25,from:'Tiphareth',to:'Yesod',letter:'Samekh',heb:'ס',tarot:'Atu XIV — Art',astro:STUDY_PATH_ASTRO[25]},
+      {n:26,from:'Tiphareth',to:'Hod',letter:'Ayin',heb:'ע',tarot:'Atu XV — The Devil',astro:STUDY_PATH_ASTRO[26]},
+      {n:27,from:'Netzach',to:'Hod',letter:'Peh',heb:'פ',tarot:'Atu XVI — The Tower',astro:STUDY_PATH_ASTRO[27]},
+      {n:28,from:'Netzach',to:'Yesod',letter:'Tzaddi',heb:'צ',tarot:'Atu IV — The Emperor',astro:STUDY_PATH_ASTRO[28]},
+      {n:29,from:'Netzach',to:'Malkuth',letter:'Qoph',heb:'ק',tarot:'Atu XVIII — The Moon',astro:STUDY_PATH_ASTRO[29]},
+      {n:30,from:'Hod',to:'Yesod',letter:'Resh',heb:'ר',tarot:'Atu XIX — The Sun',astro:STUDY_PATH_ASTRO[30]},
+      {n:31,from:'Hod',to:'Malkuth',letter:'Shin',heb:'ש',tarot:'Atu XX — The Aeon',astro:STUDY_PATH_ASTRO[31]},
+      {n:32,from:'Yesod',to:'Malkuth',letter:'Tav',heb:'ת',tarot:'Atu XXI — The Universe',astro:STUDY_PATH_ASTRO[32]},
+    ];
+
+    // ── Study state ──────────────────────────────────────────────────────────
+
+    let sCat = 'sephiroth', sMode = 'flashcard';
+    let sDeck = [], sIdx = 0, sFlipped = false;
+    let sCorrect = 0, sTotal = 0;
+    let sFilters = new Set();
+
+    function sShuffle(arr) { return arr.slice().sort(() => Math.random() - 0.5); }
+
+    function sBuildDeck() {
+      let d = sCat === 'sephiroth' ? STUDY_SEP.slice() : STUDY_PATHS.slice();
+      if (sFilters.size) d = d.filter(x => sFilters.has(sCat === 'sephiroth' ? x.id : String(x.n)));
+      sDeck = sShuffle(d); sIdx = 0; sFlipped = false;
+    }
+
+    function sPathLoc(p) { return p.from + ' → ' + p.to; }
+
+    // ── Study render ─────────────────────────────────────────────────────────
+
+    function initStudy() {
+      sCorrect = 0; sTotal = 0; sFilters = new Set();
+      sBuildDeck();
+      sRender();
+    }
+
+    function sRender() {
+      const panel = document.getElementById('study-panel');
+      const isSeph = sCat === 'sephiroth';
+      const item = sDeck[sIdx];
+      const pct = sDeck.length ? Math.round(sIdx / sDeck.length * 100) : 0;
+
+      // Filter chips
+      let filterHtml = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">';
+      if (isSeph) {
+        filterHtml += STUDY_SEP.map(s =>
+          `<button class="s-chip${sFilters.has(s.id) ? ' s-chip-on' : ''}" onclick="sToggleFilter('${s.id}')">${s.name}</button>`
+        ).join('');
+      } else {
+        filterHtml += STUDY_PATHS.map(p =>
+          `<button class="s-chip${sFilters.has(String(p.n)) ? ' s-chip-on' : ''}" onclick="sToggleFilter('${p.n}')">${p.n}</button>`
+        ).join('');
+      }
+      filterHtml += '</div>';
+
+      let mainHtml = '';
+      if (!sDeck.length) {
+        mainHtml = '<div style="color:#003366;font-style:italic;text-align:center;padding:2rem 0;">No cards match the current filter.</div>';
+      } else if (sMode === 'flashcard') {
+        mainHtml = sRenderFlashcard(item);
+      } else {
+        mainHtml = sRenderQuiz(item);
+      }
+
+      panel.innerHTML = `
+        <style>
+          .s-tab { font-family:'Anonymous Pro',monospace;font-size:0.62rem;letter-spacing:0.12em;color:#005580;background:rgba(0,0,51,0.6);border:1px solid #003366;padding:4px 12px;cursor:pointer;transition:color 0.2s,border-color 0.2s; }
+          .s-tab:hover,.s-tab.s-tab-on { color:#00BFFF;border-color:#00BFFF; }
+          .s-chip { font-family:'Anonymous Pro',monospace;font-size:0.58rem;letter-spacing:0.06em;color:#005580;background:none;border:1px solid #003366;padding:3px 9px;cursor:pointer;border-radius:12px;transition:color 0.2s,border-color 0.2s; }
+          .s-chip:hover,.s-chip.s-chip-on { color:#00BFFF;border-color:#00BFFF; }
+          .s-card { border:2px solid #003366;padding:2rem 2rem 1.5rem;position:relative;cursor:pointer;transition:border-color 0.2s;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,51,0.7); }
+          .s-card:hover { border-color:#005580; }
+          .s-card::before { content:'';position:absolute;inset:8px;border:1px solid #003366;pointer-events:none;opacity:0.4; }
+          .s-card-type { font-family:'Anonymous Pro',monospace;font-size:0.55rem;letter-spacing:0.2em;color:#005580;position:absolute;top:1rem;left:50%;transform:translateX(-50%);white-space:nowrap;text-transform:uppercase; }
+          .s-card-num { font-family:'Anonymous Pro',monospace;font-size:0.55rem;color:#005580;position:absolute;top:1rem;right:1rem; }
+          .s-heb { font-family:'Anonymous Pro',monospace;font-size:3rem;color:#00BFFF;line-height:1;margin-bottom:0.4rem; }
+          .s-card-title { font-family:'Anonymous Pro',monospace;font-size:1.3rem;font-weight:700;color:#00BFFF;text-align:center;letter-spacing:0.06em;margin-bottom:0.25rem;text-transform:uppercase; }
+          .s-card-sub { font-family:'Anonymous Pro',monospace;font-size:0.8rem;color:#005580;text-align:center;letter-spacing:0.06em; }
+          .s-card-hint { font-family:'Anonymous Pro',monospace;font-size:0.52rem;letter-spacing:0.14em;color:#002244;position:absolute;bottom:0.8rem;left:50%;transform:translateX(-50%);white-space:nowrap; }
+          .s-ans-row { display:flex;gap:10px;align-items:baseline;padding:5px 0;border-bottom:1px solid #002244; }
+          .s-ans-row:last-child { border-bottom:none; }
+          .s-ans-label { font-family:'Anonymous Pro',monospace;font-size:0.55rem;letter-spacing:0.12em;color:#005580;min-width:110px;text-transform:uppercase; }
+          .s-ans-val { font-family:'Anonymous Pro',monospace;font-size:0.9rem;color:#7ecfef;line-height:1.5; }
+          .s-ans-heb { font-size:1.3rem;color:#00BFFF; }
+          .s-btn { font-family:'Anonymous Pro',monospace;font-size:0.6rem;letter-spacing:0.1em;color:#005580;background:rgba(0,0,51,0.6);border:1px solid #003366;padding:6px 20px;cursor:pointer;transition:color 0.2s,border-color 0.2s; }
+          .s-btn:hover { color:#00BFFF;border-color:#00BFFF; }
+          .s-quiz-opt { width:100%;text-align:left;font-family:'Anonymous Pro',monospace;font-size:0.88rem;color:#7ecfef;background:rgba(0,0,51,0.6);border:1px solid #003366;padding:9px 14px;cursor:pointer;transition:background 0.15s,border-color 0.15s,color 0.15s;margin-bottom:6px;letter-spacing:0.02em; }
+          .s-quiz-opt:hover:not([disabled]) { border-color:#005580;background:#001133; }
+          .s-quiz-opt.s-correct { border-color:#00884a;color:#00cc77;background:#001a0d; }
+          .s-quiz-opt.s-wrong { border-color:#884400;color:#cc6600;background:#1a0d00; }
+          .s-prog-bar { height:2px;background:#003366;margin-bottom:20px;position:relative; }
+          .s-prog-fill { height:100%;background:#00BFFF;transition:width 0.3s; }
+          .s-prog-label { font-family:'Anonymous Pro',monospace;font-size:0.55rem;letter-spacing:0.14em;color:#005580; }
+        </style>
+
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px;">
+          <button class="s-tab${sCat==='sephiroth'?' s-tab-on':''}" onclick="sSetCat('sephiroth')">Sephiroth</button>
+          <button class="s-tab${sCat==='paths'?' s-tab-on':''}" onclick="sSetCat('paths')">Paths</button>
+          <span style="flex:1"></span>
+          <button class="s-tab${sMode==='flashcard'?' s-tab-on':''}" onclick="sSetMode('flashcard')">Flashcard</button>
+          <button class="s-tab${sMode==='quiz'?' s-tab-on':''}" onclick="sSetMode('quiz')">Quiz</button>
+          <button class="s-tab" onclick="sReshuffle()">⇌</button>
+        </div>
+
+        <div class="s-prog-bar"><div class="s-prog-fill" style="width:${pct}%"></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <span class="s-prog-label">${sIdx} / ${sDeck.length}</span>
+          ${sMode==='quiz'?`<span class="s-prog-label">Score: ${sCorrect} / ${sTotal}</span>`:''}
+        </div>
+
+        ${filterHtml}
+        ${mainHtml}
+      `;
+    }
+
+    function sRenderFlashcard(item) {
+      const isSeph = sCat === 'sephiroth';
+      const showHeb = !isSeph;
+      const frontSub = isSeph ? item.meaning : (item.from + ' — ' + item.to);
+
+      if (!sFlipped) {
+        return `
+          <div class="s-card" onclick="sFlip()">
+            <div class="s-card-type">${isSeph ? 'SEPHIRAH' : 'PATH'}</div>
+            <div class="s-card-num">${item.n}</div>
+            ${showHeb ? `<div class="s-heb">${item.heb}</div>` : ''}
+            <div class="s-card-title">${isSeph ? item.name : ('Path ' + item.n)}</div>
+            <div class="s-card-sub">${frontSub}</div>
+            <div class="s-card-hint">click to reveal</div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;">
+            <button class="s-btn" onclick="sNav(-1)">← prev</button>
+            <button class="s-btn" onclick="sFlip()">reveal</button>
+            <button class="s-btn" onclick="sNav(1)">next →</button>
+          </div>`;
+      } else {
+        const rows = isSeph
+          ? [
+              ['Divine name', item.divineName, false],
+              ['Archangel', item.archangel, false],
+              ['Angelic order', item.angelicOrder, false],
+              ['Astrology', item.astro, false],
+              ['Tarot', item.tarot, false],
+            ]
+          : [
+              ['Location', sPathLoc(item), false],
+              ['Hebrew', item.heb, true],
+              ['Letter', item.letter, false],
+              ['Tarot', item.tarot, false],
+              ['Astrology', item.astro, false],
+            ];
+        return `
+          <div class="s-card" onclick="sFlip()" style="cursor:pointer;">
+            <div class="s-card-type">${isSeph ? 'SEPHIRAH' : 'PATH'} ${item.n}</div>
+            <div style="width:100%;margin-top:1.5rem;">
+              ${rows.map(([lbl, val, isHeb]) =>
+                `<div class="s-ans-row">
+                  <div class="s-ans-label">${lbl}</div>
+                  <div class="s-ans-val${isHeb ? ' s-ans-heb' : ''}">${val}</div>
+                </div>`
+              ).join('')}
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:14px;">
+            <button class="s-btn" onclick="sNav(-1)">← prev</button>
+            <button class="s-btn" onclick="sFlip()">hide</button>
+            <button class="s-btn" onclick="sNav(1)">next →</button>
+          </div>`;
+      }
+    }
+
+    function sRenderQuiz(item) {
+      const isSeph = sCat === 'sephiroth';
+      const fields = isSeph
+        ? ['divineName','archangel','angelicOrder','astro','tarot']
+        : ['location','letter','tarot','astro'];
+      const labels = {divineName:'divine name',archangel:'archangel',angelicOrder:'angelic order',astro:'astrological',tarot:'tarot',location:'location',letter:'hebrew letter'};
+
+      if (!item._qField) {
+        item._qField = fields[Math.floor(Math.random() * fields.length)];
+      }
+      const field = item._qField;
+      const correctAns = field === 'location' ? sPathLoc(item) : item[field];
+      const allItems = isSeph ? STUDY_SEP : STUDY_PATHS;
+      const wrongs = sShuffle(allItems.filter(x => x !== item)).slice(0, 3).map(x =>
+        field === 'location' ? sPathLoc(x) : (x[field] || '—')
+      );
+      const options = sShuffle([correctAns, ...wrongs]);
+      const context = isSeph ? `${item.name} — ${item.meaning}` : `Path ${item.n}: ${item.from} → ${item.to}`;
+
+      let optsHtml;
+      if (item._qAnswered) {
+        optsHtml = options.map(o => {
+          const cls = o === correctAns ? 's-correct' : o === item._qChosen ? 's-wrong' : '';
+          return `<button class="s-quiz-opt${cls ? ' ' + cls : ''}" disabled>${o}</button>`;
+        }).join('');
+        optsHtml += `<div style="text-align:center;margin-top:12px;"><button class="s-btn" onclick="sQuizNext()">next →</button></div>`;
+      } else {
+        optsHtml = options.map(o =>
+          `<button class="s-quiz-opt" onclick="sQuizAnswer('${o.replace(/'/g,"\\'")}','${correctAns.replace(/'/g,"\\'")}',this)">${o}</button>`
+        ).join('');
+      }
+
+      return `
+        <div style="border:2px solid #003366;padding:1.75rem 1.75rem 1.5rem;background:rgba(0,0,51,0.7);">
+          <div style="font-family:'Anonymous Pro',monospace;font-size:0.55rem;letter-spacing:0.18em;color:#005580;margin-bottom:0.75rem;text-transform:uppercase;">${isSeph ? 'SEPHIRAH' : 'PATH'} ${item.n}</div>
+          <div style="font-family:'Anonymous Pro',monospace;color:#005580;font-size:0.85rem;margin-bottom:0.6rem;">${context}</div>
+          <div style="font-family:'Anonymous Pro',monospace;font-size:0.88rem;color:#00BFFF;letter-spacing:0.04em;margin-bottom:1.25rem;">What is the ${labels[field]} correspondence?</div>
+          ${optsHtml}
+        </div>`;
+    }
+
+    function sSetCat(cat) {
+      sCat = cat; sFilters = new Set(); sCorrect = 0; sTotal = 0;
+      sBuildDeck(); sRender();
+    }
+
+    function sSetMode(m) {
+      sMode = m; sCorrect = 0; sTotal = 0;
+      sDeck.forEach(d => { delete d._qField; delete d._qAnswered; delete d._qChosen; });
+      sIdx = 0; sFlipped = false; sRender();
+    }
+
+    function sReshuffle() {
+      sCorrect = 0; sTotal = 0;
+      sBuildDeck(); sRender();
+    }
+
+    function sToggleFilter(f) {
+      const k = String(f);
+      if (sFilters.has(k)) sFilters.delete(k); else sFilters.add(k);
+      sBuildDeck(); sRender();
+    }
+
+    function sFlip() { sFlipped = !sFlipped; sRender(); }
+
+    function sNav(dir) {
+      sIdx = (sIdx + dir + sDeck.length) % sDeck.length;
+      sFlipped = false;
+      document.getElementById('study-panel').querySelector('.s-prog-fill') &&
+        (document.getElementById('study-panel').querySelector('.s-prog-fill').style.width =
+          Math.round(sIdx / sDeck.length * 100) + '%');
+      sRender();
+    }
+
+    function sQuizAnswer(chosen, correct, btn) {
+      const item = sDeck[sIdx];
+      item._qAnswered = true;
+      item._qChosen = chosen;
+      sTotal++;
+      if (chosen === correct) sCorrect++;
+      sRender();
+    }
+
+    function sQuizNext() {
+      sIdx = (sIdx + 1) % sDeck.length;
+      sFlipped = false;
+      sRender();
+    }
+
+  </script>
+</body>
+</html>
 
     function startPan(clientX, clientY) {
       isPanning = true;
